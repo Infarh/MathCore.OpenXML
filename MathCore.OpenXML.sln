@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31025.194
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathCore.OpenXML", "MathCore.OpenXML\MathCore.OpenXML.csproj", "{A224E8A2-2A6F-408D-A4B7-529D6E5F87F6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A224E8A2-2A6F-408D-A4B7-529D6E5F87F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A224E8A2-2A6F-408D-A4B7-529D6E5F87F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A224E8A2-2A6F-408D-A4B7-529D6E5F87F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A224E8A2-2A6F-408D-A4B7-529D6E5F87F6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B62D6427-CEFC-47DF-B55B-F5BFEBE052BA}
+	EndGlobalSection
+EndGlobal
