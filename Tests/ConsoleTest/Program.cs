@@ -7,15 +7,10 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
-using GridColumn = DocumentFormat.OpenXml.Wordprocessing.GridColumn;
 using Paragraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
 using Table = DocumentFormat.OpenXml.Wordprocessing.Table;
 using TableCell = DocumentFormat.OpenXml.Wordprocessing.TableCell;
-using TableCellProperties = DocumentFormat.OpenXml.Wordprocessing.TableCellProperties;
-using TableGrid = DocumentFormat.OpenXml.Wordprocessing.TableGrid;
-using TableProperties = DocumentFormat.OpenXml.Wordprocessing.TableProperties;
 using TableRow = DocumentFormat.OpenXml.Wordprocessing.TableRow;
-using TableStyle = DocumentFormat.OpenXml.Wordprocessing.TableStyle;
 using Text = DocumentFormat.OpenXml.Wordprocessing.Text;
 
 namespace ConsoleTest

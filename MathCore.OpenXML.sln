@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31025.194
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathCore.OpenXML", "MathCore.OpenXML\MathCore.OpenXML.csproj", "{A224E8A2-2A6F-408D-A4B7-529D6E5F87F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathCore.OpenXML", "MathCore.OpenXML\MathCore.OpenXML.csproj", "{A224E8A2-2A6F-408D-A4B7-529D6E5F87F6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{52A2F54D-39A8-412F-B463-A6ABFEB3639D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTest", "Tests\ConsoleTest\ConsoleTest.csproj", "{E26260A2-D991-48CB-B507-37FDC7AB87B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleTest", "Tests\ConsoleTest\ConsoleTest.csproj", "{E26260A2-D991-48CB-B507-37FDC7AB87B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathCore.OpenXML.Tests", "Tests\MathCore.OpenXML.Tests\MathCore.OpenXML.Tests.csproj", "{9CFEC922-D37A-43B4-A0F6-01698D886257}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathCore.OpenXML.Tests", "Tests\MathCore.OpenXML.Tests\MathCore.OpenXML.Tests.csproj", "{9CFEC922-D37A-43B4-A0F6-01698D886257}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

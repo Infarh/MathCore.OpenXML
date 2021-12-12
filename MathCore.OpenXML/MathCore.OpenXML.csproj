@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>9.0</LangVersion>
-    <Version>0.0.1</Version>
+    <LangVersion>preview</LangVersion>
+    <Version>0.0.2</Version>
     <Authors>shmachilin@gmail.com</Authors>
     <Company>shmachilin@gmail.com</Company>
     <Description>Библиотека для упрощения доступа к функциям документов OpenXML</Description>
@@ -13,11 +13,11 @@
     <RepositoryUrl>https://github.com/Infarh/MathCore.OpenXML.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>OpenXML, Excel, xlsx</PackageTags>
-    <PackageReleaseNotes>Запуск проекта</PackageReleaseNotes>
+    <PackageReleaseNotes>Обновление платформы</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.12.3" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.14.0" />
   </ItemGroup>
 
 </Project>
