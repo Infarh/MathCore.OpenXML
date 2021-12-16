@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -10,6 +9,14 @@ namespace MathCore.OpenXML
     /// <summary>Ячейка таблицы</summary>
     public readonly struct ExcelCell
     {
+        private static int CharToNumber(char c) =>
+            c switch
+            {
+                >= 'a' and <= 'z' => c - 'a' + 1,
+                >= 'A' and <= 'Z' => c - 'A' + 1,
+                _ => throw new ArgumentException($"Символ {c} не принадлежит диапазону латинских букв верхнего, или нижнего регистра")
+            };
+
         private readonly string[] _SharedStrings;
         private readonly string _Formula;
         private readonly string _Value;
@@ -19,6 +26,27 @@ namespace MathCore.OpenXML
 
         /// <summary>Строковый индекс ячейки (включает буквенный индекс столбца и числовой индекс строки)</summary>
         public string Index => _Index;
+
+        public (int Row, int Col) PositionIndex
+        {
+            get
+            {
+                var chars_count = 0;
+                while (chars_count < _Index.Length && char.IsLetter(_Index[chars_count]))
+                    chars_count++;
+
+                var col_index = 0;
+                for (var i = 0; i < chars_count; i++)
+                {
+                    col_index *= 10;
+                    col_index += CharToNumber(_Index[i]);
+                }
+
+                var row_index = int.Parse(_Index.Substring(chars_count));
+
+                return (row_index, col_index);
+            }
+        }
 
         /// <summary>Формула ячейки при наличии</summary>
         public string Formula => _Formula;

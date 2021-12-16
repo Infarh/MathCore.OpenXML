@@ -3,7 +3,14 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>preview</LangVersion>
-    <Version>0.0.2</Version>
+    <ExplicitUsing>Enabled</ExplicitUsing>
+    <Version>0.0.3</Version>
+    <PackageReleaseNotes>
+      Испралвение метода формирования массива строк из строки Excel
+    </PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <Authors>shmachilin@gmail.com</Authors>
     <Company>shmachilin@gmail.com</Company>
     <Description>Библиотека для упрощения доступа к функциям документов OpenXML</Description>
@@ -13,7 +20,6 @@
     <RepositoryUrl>https://github.com/Infarh/MathCore.OpenXML.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>OpenXML, Excel, xlsx</PackageTags>
-    <PackageReleaseNotes>Обновление платформы</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
