@@ -7,6 +7,8 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
+using MathCore.OpenXML;
+
 using Paragraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
 using Table = DocumentFormat.OpenXml.Wordprocessing.Table;
 using TableCell = DocumentFormat.OpenXml.Wordprocessing.TableCell;
@@ -53,6 +55,14 @@ namespace ConsoleTest
 
         static void Main(string[] args)
         {
+            var data = Excel.File("Document.xlsx")["Data"];
+
+            foreach (var row in data)
+            {
+                var values = row.Values.ToArray();
+            }
+
+
             //EditDocument("Document.docx");
             CreateDocument("TestDoc.docx");
         }

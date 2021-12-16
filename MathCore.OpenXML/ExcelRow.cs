@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -11,14 +12,14 @@ namespace MathCore.OpenXML
 {
     /// <summary>Строка таблицы</summary>
     /// <remarks>Осуществляет однопроходный доступ к своим ячейкам в процессе чтения документа</remarks>
-    public readonly struct ExcelRow : IEnumerable<ExcelCell>, IEnumerable<string>
+    public readonly struct ExcelRow : IEnumerable<ExcelCell>, IEnumerable<string?>
     {
         /// <summary>Объект чтения должен быть сохранён до завершения перебора всех ячеек строки</summary>
         private readonly OpenXmlPartReader _Reader;
         /// <summary>Массив-таблица общих строк документа</summary>
         private readonly string[] _SharedStrings;
         private readonly int _Index;
-        private readonly string _Spans;
+        private readonly string? _Spans;
         private readonly int? _Style;
         private readonly int? _CustomFormat;
         private readonly double? _Height;
@@ -38,12 +39,27 @@ namespace MathCore.OpenXML
 
         /// <summary>Текстовые значения всех ячеек строки</summary>
         /// <remarks>При переборе значений все ячейки строки будут просмотрены и повторный доступ к ним будет невозможен</remarks>
-        public IEnumerable<string> Values => ((IEnumerable<ExcelCell>)this).Select(cell => cell.Value);
+        public IEnumerable<string?> Values
+        {
+            get
+            {
+                //return ((IEnumerable<ExcelCell>)this).Select(cell => cell.Value);
+                var last_index = 0;
+                foreach (var cell in this)
+                {
+                    var index_delta = cell.PositionIndex.Col - last_index;
+                    for (var i = 1; i < index_delta; i++)
+                        yield return null;
+                    yield return cell.Value;
+                    last_index += index_delta;
+                }
+            }
+        }
 
         private static void ReadRowAttributes(
             IEnumerable<OpenXmlAttribute> Attributes,
             out int Index,
-            out string Spans,
+            out string? Spans,
             out int? Style,
             out int? CustomFormat,
             out double? Height,
@@ -66,13 +82,13 @@ namespace MathCore.OpenXML
                 switch (attribute.LocalName)
                 {
                     case "r":
-                        Index = int.Parse(attribute.Value);
+                        Index = int.Parse(attribute.Value!);
                         break;
                     case "spans":
-                        Spans = attribute.Value;
+                        Spans = attribute.Value!;
                         break;
                     case "s":
-                        Style = int.Parse(attribute.Value);
+                        Style = int.Parse(attribute.Value!);
                         break;
                     case "customFormat" when int.TryParse(attribute.Value, out var format):
                         CustomFormat = format;
@@ -81,10 +97,10 @@ namespace MathCore.OpenXML
                         Hidden = attribute.Value == "1";
                         break;
                     case "outlineLevel":
-                        OutlineLevel = int.Parse(attribute.Value);
+                        OutlineLevel = int.Parse(attribute.Value!);
                         break;
                     case "ht":
-                        Height = double.Parse(attribute.Value, CultureInfo.InvariantCulture);
+                        Height = double.Parse(attribute.Value!, CultureInfo.InvariantCulture);
                         break;
                     case "collapsed":
                         Collapsed = attribute.Value == "1";
@@ -118,7 +134,7 @@ namespace MathCore.OpenXML
             _SharedStrings = SharedStrings;
         }
 
-        IEnumerator<string> IEnumerable<string>.GetEnumerator() => Values.GetEnumerator();
+        IEnumerator<string?> IEnumerable<string?>.GetEnumerator() => Values.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
