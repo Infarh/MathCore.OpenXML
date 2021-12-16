@@ -6,7 +6,7 @@
     <ExplicitUsing>Enabled</ExplicitUsing>
     <Version>0.0.3</Version>
     <PackageReleaseNotes>
-      Испралвение метода формирования массива строк из строки Excel
+      Исправление метода формирования массива строк из строки Excel
     </PackageReleaseNotes>
   </PropertyGroup>
 
