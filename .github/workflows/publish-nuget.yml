@@ -1,0 +1,33 @@
+name: Publish NuGet.org
+
+on:
+  push:
+    branches: 
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Update package
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup .NET 6.0.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Building
+        run: |
+          dotnet build MathCore.OpenXML -c Release --nologo
+          dotnet build Tests/MathCore.OpenXML.Tests -c Release --nologo
+      - name: Testing
+        run: dotnet test Tests/MathCore.OpenXML.Tests -c Release --no-build --nologo
+
+      - name: Packing
+        run: dotnet pack MathCore.OpenXML -c Release --no-build -v m
+         
+      - name: Publishing
+        run: dotnet nuget push "**/*.nupkg" -k ${{ secrets.NuGetApiKey }} --skip-duplicate -s https://api.nuget.org/v3/index.json
