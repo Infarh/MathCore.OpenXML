@@ -7,13 +7,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
-using MathCore.OpenXML;
-
-using Paragraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
-using Table = DocumentFormat.OpenXml.Wordprocessing.Table;
-using TableCell = DocumentFormat.OpenXml.Wordprocessing.TableCell;
-using TableRow = DocumentFormat.OpenXml.Wordprocessing.TableRow;
-using Text = DocumentFormat.OpenXml.Wordprocessing.Text;
+// ReSharper disable ArrangeMethodOrOperatorBody
 
 namespace ConsoleTest
 {
@@ -55,20 +49,70 @@ namespace ConsoleTest
 
         static void Main(string[] args)
         {
-            var data = Excel.File("Document.xlsx")["Data"];
+            var template = new FileInfo("Document.docx");
+            var document = new FileInfo("doc.docx");
+            document.Delete();
+            template.CopyTo(document);
 
-            foreach (var row in data)
-            {
-                var values = row.Values.ToArray();
-            }
+            var word = WordprocessingDocument.Open(document.FullName, true);
+            var body = word.MainDocumentPart!.Document.Body!;
 
+            foreach (var field in body.DescendantChilds<SdtElement>())
+                field.ReplaceWithValue($"[{field.GetTag()}]:{field.InnerText}");
+
+            //foreach (var block in body.DescendantChilds<SdtBlock>())
+            //{
+            //    var parent = block.Parent;
+            //    var index = parent.FirstIndexOf(block);
+            //    block.Remove();
+
+            //    var run_properties = block.DescendantChilds<RunProperties>().First();
+            //    run_properties.Remove();
+
+            //    var run = new Run();
+            //    run.AddChild(run_properties);
+            //    run.AddChild(new Text("hEADER"));
+
+            //    parent.InsertAt(new Paragraph(run), index);
+            //}
+
+            //var sdt_runs = body.DescendantChilds<SdtRun>()
+            //   .ToLookup(r => r.GetTag());
+
+            //var tags = sdt_runs.ToArray(r => r.Key);
+
+            //foreach (var tag in tags)
+            //{
+            //    foreach (var run in sdt_runs[tag])
+            //        run.ReplaceToRun($"({run.GetTag()}:{run.GetAlias()})[{run.GetText()}]~");
+
+            //}
+
+            //foreach (var sdt_run in body.DescendantChilds<SdtRun>()) 
+            //    sdt_run.ReplaceToRun($"({sdt_run.GetTag()}:{sdt_run.GetAliase()})[{sdt_run.GetText()}]~");
+
+            //word.SaveAs("test.docx");
+            word.Close();
+
+            document.Execute();
 
             //EditDocument("Document.docx");
-            CreateDocument("TestDoc.docx");
+            //CreateDocument("TestDoc.docx");
         }
+
+        //private static IEnumerable<OpenXmlElement> EnumElements(OpenXmlElement element)
+        //{
+        //    yield return element;
+        //    if (!element.HasChildren) yield break;
+
+        //    foreach (var child_element in element.ChildElements)
+        //        foreach (var child in EnumElements(child_element))
+        //            yield return child;
+        //}
 
         private static void CreateDocument(string FileName)
         {
+            if (FileName is null) throw new ArgumentNullException(nameof(FileName));
             if (File.Exists(FileName)) File.Delete(FileName);
 
             using (var word_document = WordprocessingDocument.Create(FileName, WordprocessingDocumentType.Document))

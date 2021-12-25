@@ -5,6 +5,12 @@ namespace ConsoleTest
 {
     public static class ExtensionsRun
     {
+        public static Run SetProperties(this Run run, RunProperties properties)
+        {
+            run.RunProperties = properties;
+            return run;
+        }
+
         public static Run Bold(this Run run, bool IsBold = true)
         {
             var properties = run.RunProperties ??= new();
@@ -74,9 +80,19 @@ namespace ConsoleTest
             return run;
         }
 
-        public static Run Text(this Run run, string str)
+        public static Run AppendText(this Run run, string str)
         {
             run.AppendChild(new Text { Text = str });
+            return run;
+        }
+
+        public static Run Text(this Run run, string str)
+        {
+            if (run.GetFirstChild<Text>() is { } text) 
+                text.Text = str;
+            else
+                run.AppendChild(new Text(str));
+
             return run;
         }
 

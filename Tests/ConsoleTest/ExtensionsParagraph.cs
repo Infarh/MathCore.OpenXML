@@ -16,9 +16,17 @@ namespace ConsoleTest
         public static T AlignRight<T>(this T element) where T : OpenXmlElement => element.Justification(JustificationValues.Right);
         public static T AlignCenter<T>(this T element) where T : OpenXmlElement => element.Justification(JustificationValues.Center);
 
-        public static void Add(this Paragraph paragraph, Run run) => paragraph.AppendChild(run);
+        public static Paragraph Add(this Paragraph paragraph, Run run)
+        {
+            paragraph.AppendChild(run);
+            return paragraph;
+        }
 
-        public static void Add(this Paragraph paragraph, string text) => paragraph.Add(new Run(new Text(text)));
+        public static Paragraph Add(this Paragraph paragraph, string text)
+        {
+            paragraph.Add(new Run(new Text(text)));
+            return paragraph;
+        }
 
         public static Paragraph Justification(this Paragraph paragraph, JustificationValues? Justification)
         {
