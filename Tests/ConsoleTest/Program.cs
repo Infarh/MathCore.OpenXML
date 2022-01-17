@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+
+using ConsoleTest.Models;
 
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
-// ReSharper disable ArrangeMethodOrOperatorBody
+using MathCore.OpenXML.WordProcessing;
+using MathCore.OpenXML.WordProcessing.Extensions.Word;
 
 namespace ConsoleTest
 {
@@ -49,66 +53,35 @@ namespace ConsoleTest
 
         static void Main(string[] args)
         {
-            var template = new FileInfo("Document.docx");
-            var document = new FileInfo("doc.docx");
-            document.Delete();
-            template.CopyTo(document);
+            var template_file = new FileInfo("Document.docx");
+            var document_file = new FileInfo("doc.docx");
 
-            var word = WordprocessingDocument.Open(document.FullName, true);
-            var body = word.MainDocumentPart!.Document.Body!;
+            var products = Product.Test().ToArray();
 
-            foreach (var field in body.DescendantChilds<SdtElement>())
-                field.ReplaceWithValue($"[{field.GetTag()}]:{field.InnerText}");
+            var template = Word.Template(template_file)
+                   .Field("CatalogName", "Компьютеры")
+                   .Field("CreationTime", DateTime.Now.ToString("f", CultureInfo.GetCultureInfo("ru")))
+                   .Field("ProductsCount", products.Length)
+                   .Field("ProductTotalPrice", products.Sum(p => p.Price))
+                   .FieldEnum("ProductInfo", products, (product_row, product) =>
+                    {
+                        product_row.Field("ProductId", product.Id);
+                        product_row.Field("ProductName", product.Name);
+                        product_row.Field("ProductPrice", product.Price);
+                        product_row.FieldEnum("ProductFeature", product.Features, (feature_row, feature) =>
+                        {
+                            feature_row.SetValue(feature.Description);
+                        });
+                    }).RemoveUnprocessedFields()
+                 .ReplaceFieldsWithValues()
+                ;
 
-            //foreach (var block in body.DescendantChilds<SdtBlock>())
-            //{
-            //    var parent = block.Parent;
-            //    var index = parent.FirstIndexOf(block);
-            //    block.Remove();
-
-            //    var run_properties = block.DescendantChilds<RunProperties>().First();
-            //    run_properties.Remove();
-
-            //    var run = new Run();
-            //    run.AddChild(run_properties);
-            //    run.AddChild(new Text("hEADER"));
-
-            //    parent.InsertAt(new Paragraph(run), index);
-            //}
-
-            //var sdt_runs = body.DescendantChilds<SdtRun>()
-            //   .ToLookup(r => r.GetTag());
-
-            //var tags = sdt_runs.ToArray(r => r.Key);
-
-            //foreach (var tag in tags)
-            //{
-            //    foreach (var run in sdt_runs[tag])
-            //        run.ReplaceToRun($"({run.GetTag()}:{run.GetAlias()})[{run.GetText()}]~");
-
-            //}
-
-            //foreach (var sdt_run in body.DescendantChilds<SdtRun>()) 
-            //    sdt_run.ReplaceToRun($"({sdt_run.GetTag()}:{sdt_run.GetAliase()})[{sdt_run.GetText()}]~");
-
-            //word.SaveAs("test.docx");
-            word.Close();
-
-            document.Execute();
+            var file = template.SaveTo(document_file);
+            file.Execute();
 
             //EditDocument("Document.docx");
             //CreateDocument("TestDoc.docx");
         }
-
-        //private static IEnumerable<OpenXmlElement> EnumElements(OpenXmlElement element)
-        //{
-        //    yield return element;
-        //    if (!element.HasChildren) yield break;
-
-        //    foreach (var child_element in element.ChildElements)
-        //        foreach (var child in EnumElements(child_element))
-        //            yield return child;
-        //}
 
         private static void CreateDocument(string FileName)
         {
@@ -129,7 +102,9 @@ namespace ConsoleTest
                 var footer_part = main_part.AddNewPart<FooterPart>();
                 footer_part.Footer = new()
                 {
-                    new Paragraph { "Test footer!" }.Bold().AlignRight()
+                    new Paragraph { "Test footer!" }
+                       .Bold()
+                       .AlignRight()
                 };
                 var footer_id = main_part.GetIdOfPart(footer_part);
 
