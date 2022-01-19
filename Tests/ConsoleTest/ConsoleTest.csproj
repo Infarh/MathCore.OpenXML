@@ -5,7 +5,12 @@
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <ExplicitUsing>Enabled</ExplicitUsing>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MathCore" Version="0.0.59" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\MathCore.OpenXML\MathCore.OpenXML.csproj" />

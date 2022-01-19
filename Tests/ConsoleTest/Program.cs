@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+
+using ConsoleTest.Models;
 
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
-using MathCore.OpenXML;
-
-using Paragraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
-using Table = DocumentFormat.OpenXml.Wordprocessing.Table;
-using TableCell = DocumentFormat.OpenXml.Wordprocessing.TableCell;
-using TableRow = DocumentFormat.OpenXml.Wordprocessing.TableRow;
-using Text = DocumentFormat.OpenXml.Wordprocessing.Text;
+using MathCore.OpenXML.WordProcessing;
+using MathCore.OpenXML.WordProcessing.Extensions.Word;
 
 namespace ConsoleTest
 {
@@ -55,20 +53,47 @@ namespace ConsoleTest
 
         static void Main(string[] args)
         {
-            var data = Excel.File("Document.xlsx")["Data"];
+            var template_file = new FileInfo("Document.docx");
+            var document_file = new FileInfo("doc.docx");
 
-            foreach (var row in data)
-            {
-                var values = row.Values.ToArray();
-            }
+            var products = Product.Test(rnd: new Random()).ToArray();
 
+            products[0] = products[0] with { Features = Enumerable.Empty<Product.Feature>() };
+
+            var template = Word.Template(template_file)
+                   .Field("ProductCart", products, (product_cart, product) => product_cart
+                       .Field("Name", product.Name)
+                       .Field("Id", product.Id)
+                       .Field("Price", product.Price.ToString("C2"))
+                       .Field("Description", product.Description)
+                       .Field("Feature", product.Features, (feature_cart, feature) => feature_cart
+                           .Field("Name", feature.Name)
+                           .Field("Id", feature.Id)
+                           .Field("Description", feature.Description)))
+                   .Field("CatalogName", "Компьютеры")
+                   .Field("CreationTime", DateTime.Now.ToString("f", CultureInfo.GetCultureInfo("ru")))
+                   .Field("ProductsCount", products.Length)
+                   .Field("ProductTotalPrice", products.DefaultIfEmpty().Sum(p => p?.Price ?? 0))
+                   .Field("ProductInfo", products, (product_row, product) => product_row
+                       .Field("ProductId", product.Id)
+                       .Field("ProductName", product.Name)
+                       .Field("ProductPrice", product.Price)
+                       .Field("ProductFeature", product.Features, (feature_row, feature) => feature_row
+                           .Value(feature.Description)))
+                   .RemoveUnprocessedFields()
+                   .ReplaceFieldsWithValues()
+                ;
+
+            var file = template.SaveTo(document_file);
+            file.Execute();
 
             //EditDocument("Document.docx");
-            CreateDocument("TestDoc.docx");
+            //CreateDocument("TestDoc.docx");
         }
 
         private static void CreateDocument(string FileName)
         {
+            if (FileName is null) throw new ArgumentNullException(nameof(FileName));
             if (File.Exists(FileName)) File.Delete(FileName);
 
             using (var word_document = WordprocessingDocument.Create(FileName, WordprocessingDocumentType.Document))
@@ -85,7 +110,9 @@ namespace ConsoleTest
                 var footer_part = main_part.AddNewPart<FooterPart>();
                 footer_part.Footer = new()
                 {
-                    new Paragraph { "Test footer!" }.Bold().AlignRight()
+                    new Paragraph { "Test footer!" }
+                       .Bold()
+                       .AlignRight()
                 };
                 var footer_id = main_part.GetIdOfPart(footer_part);
 

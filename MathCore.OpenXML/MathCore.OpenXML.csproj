@@ -20,6 +20,7 @@
     <RepositoryUrl>https://github.com/Infarh/MathCore.OpenXML.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>OpenXML, Excel, xlsx</PackageTags>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
