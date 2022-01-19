@@ -72,7 +72,7 @@ public class WordTemplate
                 else
                     unprocessed?.AddRange(fields);
 
-            unprocessed?.Foreach(static e => e.Remove());
+            unprocessed?.ForEach(static e => e.Remove());
 
             File.Refresh();
             return File;

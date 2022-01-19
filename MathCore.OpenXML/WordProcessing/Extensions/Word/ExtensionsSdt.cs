@@ -33,17 +33,14 @@ public static class ExtensionsSdt
 
     public static Run ReplaceToRun(this SdtRun Run, string? Content = null)
     {
-        var parent = Run.Parent ?? throw new InvalidOperationException("Элемент не имеет родительского узла");
-
         var run = Run.SdtContentRun!.GetFirstChild<Run>()!;
         run.Remove();
 
         if (Content is not null)
             run.Text(Content);
 
-        var index = parent.FirstIndexOf(run);
+        Run.InsertAfterSelf(run);
         Run.Remove();
-        parent.InsertAt(run, index);
 
         return run;
     }
@@ -74,17 +71,14 @@ public static class ExtensionsSdt
 
     public static Paragraph ReplaceToParagraph(this SdtBlock Block, string? Content = null)
     {
-        var parent = Block.Parent ?? throw new InvalidOperationException("Элемент не имеет родительского узла");
-
         var paragraph = Block.SdtContentBlock!.GetFirstChild<Paragraph>()!;
         paragraph.Remove();
 
         if (Content is not null)
             paragraph.GetFirstChild<Run>()!.Text(Content);
 
-        var index = parent.FirstIndexOf(Block);
+        Block.InsertAfterSelf(paragraph);
         Block.Remove();
-        parent.InsertAt(paragraph, index);
 
         return paragraph;
     }
@@ -147,15 +141,13 @@ public static class ExtensionsSdt
 
     public static OpenXmlElement ReplaceWithContent(this SdtElement element)
     {
-        var parent = element.Parent ?? throw new InvalidOperationException("У текущего элемента не найден родительский элемент");
-        var index = parent.FirstIndexOf(element);
-        element.Remove();
-
         var sdt_content = element.ChildElements.First(e => e.LocalName.StartsWith("sdt") && !e.LocalName.EndsWith("Pr"));
         var content = sdt_content.FirstChild ?? throw new InvalidOperationException("Не найдено содержимое шаблонного элемента");
-
         content.Remove();
-        parent.InsertAt(content, index);
+
+        element.InsertAfterSelf(content);
+        element.Remove();
+
         return content;
     }
 }
