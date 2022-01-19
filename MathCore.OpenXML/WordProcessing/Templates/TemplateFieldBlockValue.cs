@@ -76,7 +76,7 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
         public IFieldValueSetter Field(string FieldName, object Value) => Field(FieldName, Value.ToString());
         public IFieldValueSetter Field<TValue>(string FieldName, TValue Value) => Value is null ? this : Field(FieldName, Value.ToString());
 
-        public void SetValue(string Value)
+        public void Value(string Value)
         {
             if (_CurrentElement is null)
                 throw new NotSupportedException("Добавление текстового значения в форму невозможно. Требуется указать название поля.");
@@ -86,9 +86,9 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
             paragraph.Text(Value);
         }
 
-        public void SetValue(Func<string> Value) => SetValue(Value());
+        public void Value(Func<string> Value) => this.Value(Value());
 
-        public void SetValue(object Value) => SetValue(Value.ToString());
+        public void Value(object Value) => this.Value(Value.ToString());
 
         public IFieldValueSetter Field<TValue>(
             string FieldName,
@@ -134,7 +134,7 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
                .Where(e => e.Tag is { Length: > 0 })
                .ToLookup(e => e.Tag, e => e.Element);
 
-            _Setter(this, Value);
+            _Setter(this, Value); 
         }
     }
 
@@ -176,11 +176,16 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
     {
         OpenXmlElement last_element = Field;
         var template = Field.GetContent();
+        var any = false;
         foreach (var value in _Values)
         {
+            any = true;
             last_element = last_element.InsertAfterSelf(template.CloneNode(true));
             _ValueSetter.FeelElement(value, last_element, ReplaceFieldsWithValues);
         }
+
+        if (!any) 
+            Field.InsertAfterSelf(new Paragraph());
 
         Field.Remove();
     }
@@ -193,11 +198,16 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
 
         OpenXmlElement last_element = field;
         var template = field.GetContent();
+        var any = false;
         foreach (var value in _Values)
         {
+            any = true;
             last_element = last_element.InsertAfterSelf(template.CloneNode(true));
             _ValueSetter.FeelElement(value, last_element, ReplaceFieldsWithValues);
         }
+
+        if (!any) 
+            field.InsertAfterSelf(new Paragraph());
 
         field.Remove();
     }
@@ -207,19 +217,24 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
         var block_content_0 = BlockField.SdtContentBlock?.FirstChild as SdtBlock ?? throw new InvalidOperationException("Содержимое шаблонного блока не найдено");
         var template_elements = block_content_0.SdtContentBlock?.ChildElements ?? throw new InvalidOperationException("Дочерние элементы шаблонного блока не определены.");
 
-        //OpenXmlElement last_element = BlockField;
         var elements = new List<OpenXmlElement>(template_elements.Count);
+        var any = false;
         foreach (var value in _Values)
         {
+            any = true;
+
             elements.AddRange(template_elements.Select(e => e.CloneNode(true)));
             BlockField.InsertBeforeSelf(elements[0]);
-            for (var i = 1; i < elements.Count; i++) 
+            for (var i = 1; i < elements.Count; i++)
                 elements[i - 1].InsertAfterSelf(elements[i]);
 
             _ValueSetter.FeelElements(value, elements, ReplaceFieldsWithValues);
 
             elements.Clear();
         }
+
+        if (!any) 
+            BlockField.InsertAfterSelf(new Paragraph());
 
         BlockField.Remove();
     }

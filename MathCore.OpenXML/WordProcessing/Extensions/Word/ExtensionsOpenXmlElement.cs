@@ -46,13 +46,10 @@ public static class ExtensionsOpenXmlElement
         where TSource : OpenXmlElement
         where TDestination : OpenXmlElement
     {
-        var parent = Source.Parent ?? throw new InvalidOperationException("У исходного элемента отсутствует родительский");
-        var index = parent.FirstIndexOf(Source);
+        if (Destination.Parent is not null)
+            Destination.Remove();
+        Source.InsertAfterSelf(Destination);
         Source.Remove();
-
-        Destination.Remove();
-        parent.InsertAt(Destination, index);
-
         return Source;
     }
 }

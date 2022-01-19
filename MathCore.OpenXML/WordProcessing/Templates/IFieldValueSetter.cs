@@ -12,9 +12,9 @@ public interface IFieldValueSetter
     IFieldValueSetter Field(string FieldName, object Value);
     IFieldValueSetter Field<T>(string FieldName, T Value);
 
-    void SetValue(string Value);
-    void SetValue(Func<string> Value);
-    void SetValue(object Value);
+    void Value(string Value);
+    void Value(Func<string> Value);
+    void Value(object Value);
 
     IFieldValueSetter Field<T>(string FieldName, IEnumerable<T> Values, Action<IFieldValueSetter, T> Setter);
 }

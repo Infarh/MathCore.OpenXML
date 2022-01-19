@@ -79,7 +79,7 @@ namespace ConsoleTest
                        .Field("ProductName", product.Name)
                        .Field("ProductPrice", product.Price)
                        .Field("ProductFeature", product.Features, (feature_row, feature) => feature_row
-                           .SetValue(feature.Description)))
+                           .Value(feature.Description)))
                    .RemoveUnprocessedFields()
                    .ReplaceFieldsWithValues()
                 ;
