@@ -14,7 +14,7 @@ public record Product(
     IEnumerable<Product.Feature> Features)
 {
     public record Feature(int Id, string Name, string Description);
-    public static IEnumerable<Product> Test(int Count = 10) => Enumerable
+    public static IEnumerable<Product> Test(int Count = 10, Random? rnd = null) => Enumerable
        .Range(1, Count)
        .Select(i => new Product(
             Id: i, 
@@ -22,7 +22,7 @@ public record Product(
             Price: i * 1000 - i * 10, 
             Description: $"Description of product {i}",
             Features: Enumerable
-               .Range(1, Random.Shared.Next(10))
+               .Range(1, (rnd ?? Random.Shared).Next(4) + 1)
                .Select(n => new Feature(
                     Id: i * Count + n,
                     Name: $"Feature-{i}-{n}",

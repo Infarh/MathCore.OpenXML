@@ -36,3 +36,23 @@ public class TemplateFieldValue : TemplateField
                 field.SetContentValue(value);
     }
 }
+
+public class TemplateFieldValue<T> : TemplateField
+{
+    private readonly T _Value;
+
+    public TemplateFieldValue(string Tag, T Value) : base(Tag) => _Value = Value;
+
+    public override void Process(IEnumerable<SdtElement> Fields, bool ReplaceFieldsWithValues)
+    {
+        var value = _Value as string ?? (_Value as Func<string>)?.Invoke() ?? _Value?.ToString();
+        if(value is null) return;
+
+        if (ReplaceFieldsWithValues)
+            foreach (var field in Fields)
+                field.ReplaceWithContentValue(value);
+        else
+            foreach (var field in Fields)
+                field.SetContentValue(value);
+    }
+}

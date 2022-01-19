@@ -54,9 +54,9 @@ public class WordTemplate
             using var document = WordprocessingDocument.Open(File.FullName, true);
             var word_main_document_part = document.MainDocumentPart ?? throw new InvalidOperationException("Отсутствует основная часть документа");
 
-            var document_body_fields = word_main_document_part.Document.Descendants<SdtElement>();
-            var headers_fields = document.MainDocumentPart.HeaderParts.SelectMany(static h => h.Header.Descendants<SdtElement>());
-            var footers_fields = document.MainDocumentPart.FooterParts.SelectMany(static f => f.Footer.Descendants<SdtElement>());
+            var document_body_fields = word_main_document_part.Document.GetFields();
+            var headers_fields = document.MainDocumentPart.HeaderParts.SelectMany(static h => h.Header.GetFields());
+            var footers_fields = document.MainDocumentPart.FooterParts.SelectMany(static f => f.Footer.GetFields());
 
             var document_fields = document_body_fields
                .Concat(headers_fields)
@@ -68,7 +68,7 @@ public class WordTemplate
             var unprocessed = _RemoveUnprocessedFields ? new List<SdtElement>() : null;
             foreach (var (tag, fields) in document_fields)
                 if (_Fields.TryGetValue(tag!, out var template))
-                    template.Process(fields, _ReplaceFieldsWithValues);
+                        template.Process(fields, _ReplaceFieldsWithValues);
                 else
                     unprocessed?.AddRange(fields);
 
@@ -102,7 +102,13 @@ public class WordTemplate
         return this;
     }
 
-    public WordTemplate FieldEnum<T>(string FieldName, IReadOnlyCollection<T> Values, Action<IFieldValueSetter, T> Setter)
+    public WordTemplate Field<T>(string FieldName, T FieldValue)
+    {
+        _Fields[FieldName] = new TemplateFieldValue<T>(FieldName, FieldValue);
+        return this;
+    }
+
+    public WordTemplate Field<T>(string FieldName, IReadOnlyCollection<T> Values, Action<IFieldValueSetter, T> Setter)
     {
         _Fields[FieldName] = TemplateFieldBlockValue.Create(FieldName, Values, Setter);
         return this;

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Tags;
+using System.Xml.Linq;
 
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -25,7 +27,7 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
     {
         private readonly Action<IFieldValueSetter, T> _Setter;
         private OpenXmlElement _CurrentElement = null!;
-        private Dictionary<string, SdtElement> _Fields = null!;
+        private ILookup<string?, SdtElement> _Fields = null!;
         private bool _ReplaceFieldsWithValues;
 
         public object this[string FieldName]
@@ -34,9 +36,15 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
             {
                 switch (value)
                 {
-                    default: Field(FieldName, value); break;
-                    case string v: Field(FieldName, v); break;
-                    case Func<string> v: Field(FieldName, v); break;
+                    default:
+                        Field(FieldName, value);
+                        break;
+                    case string v:
+                        Field(FieldName, v);
+                        break;
+                    case Func<string> v:
+                        Field(FieldName, v);
+                        break;
                 }
             }
         }
@@ -47,13 +55,14 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
         {
             if (Value is null) return;
 
-            if (_Fields is not { Count: > 0 } fields || !fields.TryGetValue(FieldName, out var field)) return;
-
+            if (_Fields.Count == 0) return;
 
             if (_ReplaceFieldsWithValues)
-                field.ReplaceWithContentValue(Value);
+                foreach (var field in _Fields[FieldName])
+                    field.ReplaceWithContentValue(Value);
             else
-                field.SetContentValue(Value);
+                foreach (var field in _Fields[FieldName])
+                    field.SetContentValue(Value);
         }
 
         public IFieldValueSetter Field(string FieldName, string Value)
@@ -65,9 +74,13 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
         public IFieldValueSetter Field(string FieldName, Func<string> Value) => Field(FieldName, Value());
 
         public IFieldValueSetter Field(string FieldName, object Value) => Field(FieldName, Value.ToString());
+        public IFieldValueSetter Field<TValue>(string FieldName, TValue Value) => Value is null ? this : Field(FieldName, Value.ToString());
 
         public void SetValue(string Value)
         {
+            if (_CurrentElement is null)
+                throw new NotSupportedException("Добавление текстового значения в форму невозможно. Требуется указать название поля.");
+
             var paragraph = _CurrentElement as Paragraph
                 ?? _CurrentElement.Descendants<Paragraph>().First();
             paragraph.Text(Value);
@@ -77,33 +90,51 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
 
         public void SetValue(object Value) => SetValue(Value.ToString());
 
-        public IFieldValueSetter FieldEnum<TValue>(
+        public IFieldValueSetter Field<TValue>(
             string FieldName,
             IEnumerable<TValue> Values,
             Action<IFieldValueSetter, TValue> Setter)
         {
-            if (_Fields is not { Count: > 0 } fields || !fields.TryGetValue(FieldName, out var field))
+            if (_Fields.Count == 0)
                 return this;
 
-            var block = Create(FieldName, Values, Setter);
-            block.Process(field, _ReplaceFieldsWithValues);
+            var fields = _Fields[FieldName];
+
+            var values = Values.ToArray();
+            foreach (var field in fields)
+            {
+                var block = Create(FieldName, values, Setter);
+                block.ProcessField(field, _ReplaceFieldsWithValues);
+            }
 
             return this;
         }
 
-        public OpenXmlElement CreateElement(T Value, OpenXmlElement Template, bool ReplaceFieldsWithValues)
+        public OpenXmlElement FeelElement(T Value, OpenXmlElement Element, bool ReplaceFieldsWithValues)
         {
-            var element = Template.CloneNode(true);
-            _CurrentElement = element;
+            _CurrentElement = Element;
             _ReplaceFieldsWithValues = ReplaceFieldsWithValues;
-            _Fields = element.Descendants<SdtElement>()
-               .Select(Element => (Tag: Element.GetTag(), Element))
+
+            _Fields = Element.GetFields()
+               .Select(e => (Tag: e.GetTag(), Element: e))
                .Where(e => e.Tag is { Length: > 0 })
-               .ToDictionary(e => e.Tag, e => e.Element)!;
+               .ToLookup(e => e.Tag, e => e.Element);
 
             _Setter(this, Value);
 
-            return element;
+            return Element;
+        }
+
+        public void FeelElements(T Value, IReadOnlyList<OpenXmlElement> Elements, bool ReplaceFieldsWithValues)
+        {
+            _ReplaceFieldsWithValues = ReplaceFieldsWithValues;
+
+            _Fields = Elements.SelectMany(e => e.GetFields())
+               .Select(e => (Tag: e.GetTag(), Element: e))
+               .Where(e => e.Tag is { Length: > 0 })
+               .ToLookup(e => e.Tag, e => e.Element);
+
+            _Setter(this, Value);
         }
     }
 
@@ -120,29 +151,76 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
     public override void Process(IEnumerable<SdtElement> Fields, bool ReplaceFieldsWithValues)
     {
         foreach (var field in Fields)
-            Process(field, ReplaceFieldsWithValues);
+            ProcessField(field, ReplaceFieldsWithValues);
+    }
+
+    private void ProcessField(SdtElement Field, bool ReplaceFieldsWithValues)
+    {
+        switch (Field)
+        {
+            case SdtBlock block:
+                ProcessBlock(block, ReplaceFieldsWithValues);
+                break;
+
+            case SdtCell cell:
+                ProcessCell(cell, ReplaceFieldsWithValues);
+                break;
+
+            default:
+                Process(Field, ReplaceFieldsWithValues);
+                break;
+        }
     }
 
     private void Process(SdtElement Field, bool ReplaceFieldsWithValues)
     {
-        var field = Field;
-        if (field is SdtCell sdt_cell)
+        OpenXmlElement last_element = Field;
+        var template = Field.GetContent();
+        foreach (var value in _Values)
         {
-            var cell = sdt_cell.ReplaceWithContent();
-            field = cell.GetFirstChild<SdtBlock>() 
-                ?? throw new InvalidOperationException("Не найден шаблонный блок в шаблонной ячейке таблицы");
+            last_element = last_element.InsertAfterSelf(template.CloneNode(true));
+            _ValueSetter.FeelElement(value, last_element, ReplaceFieldsWithValues);
         }
 
-        var parent = field.Parent ?? throw new InvalidOperationException("Не найден родительский элемент");
-        var index = parent!.FirstIndexOf(field);
-        field.Remove();
+        Field.Remove();
+    }
 
+    private void ProcessCell(SdtCell CellField, bool ReplaceFieldsWithValues)
+    {
+        var cell = CellField.ReplaceWithContent();
+        var field = cell.GetFirstChild<SdtBlock>()
+            ?? throw new InvalidOperationException("Не найден шаблонный блок в шаблонной ячейке таблицы");
+
+        OpenXmlElement last_element = field;
         var template = field.GetContent();
         foreach (var value in _Values)
         {
-            var element = _ValueSetter.CreateElement(value, template, ReplaceFieldsWithValues);
-            parent.InsertAt(element, index);
-            index++;
+            last_element = last_element.InsertAfterSelf(template.CloneNode(true));
+            _ValueSetter.FeelElement(value, last_element, ReplaceFieldsWithValues);
         }
+
+        field.Remove();
+    }
+
+    private void ProcessBlock(SdtBlock BlockField, bool ReplaceFieldsWithValues)
+    {
+        var block_content_0 = BlockField.SdtContentBlock?.FirstChild as SdtBlock ?? throw new InvalidOperationException("Содержимое шаблонного блока не найдено");
+        var template_elements = block_content_0.SdtContentBlock?.ChildElements ?? throw new InvalidOperationException("Дочерние элементы шаблонного блока не определены.");
+
+        //OpenXmlElement last_element = BlockField;
+        var elements = new List<OpenXmlElement>(template_elements.Count);
+        foreach (var value in _Values)
+        {
+            elements.AddRange(template_elements.Select(e => e.CloneNode(true)));
+            BlockField.InsertBeforeSelf(elements[0]);
+            for (var i = 1; i < elements.Count; i++) 
+                elements[i - 1].InsertAfterSelf(elements[i]);
+
+            _ValueSetter.FeelElements(value, elements, ReplaceFieldsWithValues);
+
+            elements.Clear();
+        }
+
+        BlockField.Remove();
     }
 }

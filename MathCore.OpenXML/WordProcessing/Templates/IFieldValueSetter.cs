@@ -10,10 +10,11 @@ public interface IFieldValueSetter
     IFieldValueSetter Field(string FieldName, string Value);
     IFieldValueSetter Field(string FieldName, Func<string> Value);
     IFieldValueSetter Field(string FieldName, object Value);
+    IFieldValueSetter Field<T>(string FieldName, T Value);
 
     void SetValue(string Value);
     void SetValue(Func<string> Value);
     void SetValue(object Value);
 
-    IFieldValueSetter FieldEnum<T>(string FieldName, IEnumerable<T> Values, Action<IFieldValueSetter, T> Setter);
+    IFieldValueSetter Field<T>(string FieldName, IEnumerable<T> Values, Action<IFieldValueSetter, T> Setter);
 }

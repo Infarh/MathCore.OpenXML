@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using DocumentFormat.OpenXml;
@@ -8,6 +9,28 @@ namespace MathCore.OpenXML.WordProcessing.Extensions.Word;
 
 public static class ExtensionsSdt
 {
+    public static IEnumerable<SdtElement> GetFields(this OpenXmlElement Root)
+    {
+        if (Root is SdtElement root_sdt)
+        {
+            yield return root_sdt;
+            yield break;
+        }
+
+        var queue = new Stack<OpenXmlElement>(Root.ChildElements);
+
+        while (queue.Count > 0)
+        {
+            var element = queue.Pop();
+
+            if (element is SdtElement field)
+                yield return field;
+            else
+                foreach (var child_element in element.ChildElements)
+                    queue.Push(child_element);
+        }
+    }
+
     public static Run ReplaceToRun(this SdtRun Run, string? Content = null)
     {
         var parent = Run.Parent ?? throw new InvalidOperationException("Элемент не имеет родительского узла");
@@ -27,7 +50,7 @@ public static class ExtensionsSdt
 
     public static string? GetTag(this SdtElement run)
     {
-        var properties = run.GetFirstChild<SdtProperties>() 
+        var properties = run.GetFirstChild<SdtProperties>()
             ?? throw new InvalidOperationException("Не найден узел с параметрами");
 
         var tag = properties.Elements<Tag>().FirstOrDefault();
@@ -74,8 +97,6 @@ public static class ExtensionsSdt
 
     public static OpenXmlElement ReplaceWithContentValue(this SdtElement Element, string? Content = null)
     {
-        var parent = Element.Parent ?? throw new InvalidOperationException("Элемент не имеет родительского узла");
-
         var content = Element.GetContent();
         content.Remove();
 
@@ -85,16 +106,16 @@ public static class ExtensionsSdt
             run.Text(Content);
         }
 
-        var index = parent.FirstIndexOf(Element);
+        Element.InsertAfterSelf(content);
         Element.Remove();
-
-        parent.InsertAt(content, index);
         return content;
     }
 
     public static SdtElement SetContentValue(this SdtElement Element, string Content)
     {
-        Element.GetContent().DescendantChilds<Run>().First().Text(Content);
+        var content = Element.GetContent();
+        var run = content as Run ?? content.Descendants<Run>().First();
+        run.Text(Content);
         return Element;
     }
 
@@ -110,12 +131,12 @@ public static class ExtensionsSdt
 
         return Element.Descendants().First(e => e.Parent!.LocalName == "sdtContent" && e is not SdtElement);
     }
-        //Element switch
-        //{
-        //    SdtCell cell => cell.SdtContentCell.
-        //    _ => Element.Descendants().First(e => e.Parent!.LocalName == "sdtContent" && e is not SdtElement)
-        //};
-           
+    //Element switch
+    //{
+    //    SdtCell cell => cell.SdtContentCell.
+    //    _ => Element.Descendants().First(e => e.Parent!.LocalName == "sdtContent" && e is not SdtElement)
+    //};
+
 
     public static void Deconstruct(this SdtElement element, out string? Tag, out string? Alias, out OpenXmlElement Content)
     {
@@ -130,8 +151,9 @@ public static class ExtensionsSdt
         var index = parent.FirstIndexOf(element);
         element.Remove();
 
-        var sdt_content = element.ChildElements.First(e => e.LocalName.StartsWith("sdt") && e.LocalName != "sdtPr");
+        var sdt_content = element.ChildElements.First(e => e.LocalName.StartsWith("sdt") && !e.LocalName.EndsWith("Pr"));
         var content = sdt_content.FirstChild ?? throw new InvalidOperationException("Не найдено содержимое шаблонного элемента");
+
         content.Remove();
         parent.InsertAt(content, index);
         return content;
