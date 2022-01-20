@@ -178,7 +178,7 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
         foreach (var value in _Values)
         {
             any = true;
-            last_element = last_element.InsertAfterSelf(template.CloneNode(true));
+            last_element = template.SelectMany(e => e.CloneNode(true)).Aggregate(last_element, (last, next) => last.InsertAfterSelf(next));
             _ValueSetter.FeelElement(value, last_element, ReplaceFieldsWithValues);
         }
 
@@ -200,7 +200,7 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
         foreach (var value in _Values)
         {
             any = true;
-            last_element = last_element.InsertAfterSelf(template.CloneNode(true));
+            last_element = template.SelectMany(e => e.CloneNode(true)).Aggregate(last_element, (last, next) => last.InsertAfterSelf(next));
             _ValueSetter.FeelElement(value, last_element, ReplaceFieldsWithValues);
         }
 

@@ -43,6 +43,8 @@ public class WordTemplate
         return this;
     }
 
+    public FileInfo SaveTo(string FilePath) => SaveTo(new FileInfo(FilePath));
+
     public FileInfo SaveTo(FileInfo File)
     {
         try
@@ -68,7 +70,7 @@ public class WordTemplate
             var unprocessed = _RemoveUnprocessedFields ? new List<SdtElement>() : null;
             foreach (var (tag, fields) in document_fields)
                 if (_Fields.TryGetValue(tag!, out var template))
-                        template.Process(fields, _ReplaceFieldsWithValues);
+                    template.Process(fields, _ReplaceFieldsWithValues);
                 else
                     unprocessed?.AddRange(fields);
 

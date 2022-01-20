@@ -89,50 +89,58 @@ public static class ExtensionsSdt
         return paragraph;
     }
 
-    public static OpenXmlElement ReplaceWithContentValue(this SdtElement Element, string? Content = null)
+    public static void ReplaceWithContentValue(this SdtElement Element, string? Content = null)
     {
-        var content = Element.GetContent();
-        content.Remove();
+        var content = Element.GetContent().ToArray();
 
-        if (Content is not null)
+        var first = true;
+        foreach (var content_element in content)
         {
-            var run = content as Run ?? content.DescendantChilds<Run>().First();
+            content_element.Remove();
+
+            if (Content == null || !first) continue;
+
+            var run = content_element as Run ?? content_element.DescendantChilds<Run>().FirstOrDefault();
+            if (run is null) continue;
+
+            first = false;
             run.Text(Content);
+            Element.InsertAfterSelf(content_element);
         }
 
-        Element.InsertAfterSelf(content);
         Element.Remove();
-        return content;
     }
 
-    public static SdtElement SetContentValue(this SdtElement Element, string Content)
+    public static void SetContentValue(this SdtElement Element, string Content)
     {
-        var content = Element.GetContent();
-        var run = content as Run ?? content.Descendants<Run>().First();
-        run.Text(Content);
-        return Element;
+        var first = true;
+        foreach (var run in Element.GetContent().OfType<Run>().ToArray())
+            if (first)
+            {
+                first = false;
+                run.Text(Content);
+            }
+            else
+                run.Remove();
+
+        //var content = Element.GetContent();
+        //var run = content as Run;
+        //if (run is null)
+        //    run = content.Descendants<Run>().FirstOrDefault();
+        //if (run is null)
+        //    throw new InvalidOperationException();
+        ////var run = content as Run ?? content.Descendants<Run>().First();
+        //run.Text(Content);
     }
 
-    public static OpenXmlElement GetContent(this SdtElement Element)
+    public static IEnumerable<OpenXmlElement> GetContent(this SdtElement Element)
     {
-        //if (Element is SdtCell cell)
-        //{
-        //    var content = cell.SdtContentCell!.FirstChild!;
-        //    //var sdt_block = content.GetFirstChild<SdtBlock>().SdtContentBlock.FirstChild;
-        //    //return sdt_block!;
-        //    return paragraph;
-        //}
-
-        return Element.Descendants().First(e => e.Parent!.LocalName == "sdtContent" && e is not SdtElement);
+        var first_content_element = Element.Descendants().First(e => e.Parent!.LocalName == "sdtContent" && e is not SdtElement);
+        var content_container = first_content_element.Parent;
+        return content_container!.ChildElements;
     }
-    //Element switch
-    //{
-    //    SdtCell cell => cell.SdtContentCell.
-    //    _ => Element.Descendants().First(e => e.Parent!.LocalName == "sdtContent" && e is not SdtElement)
-    //};
 
-
-    public static void Deconstruct(this SdtElement element, out string? Tag, out string? Alias, out OpenXmlElement Content)
+    public static void Deconstruct(this SdtElement element, out string? Tag, out string? Alias, out IEnumerable<OpenXmlElement> Content)
     {
         Tag = element.GetTag();
         Alias = element.GetAlias();
