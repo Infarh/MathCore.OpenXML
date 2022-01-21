@@ -27,7 +27,7 @@ public static class ExtensionsParagraph
 
     public static Paragraph Add(this Paragraph paragraph, string text)
     {
-        paragraph.Add(new Run(new DocumentFormat.OpenXml.Wordprocessing.Text(text)));
+        paragraph.Add(new Run(new Text(text)));
         return paragraph;
     }
 
@@ -62,8 +62,8 @@ public static class ExtensionsParagraph
 
     public static Paragraph Bold(this Paragraph paragraph, bool IsBold = true)
     {
-        var properties = (paragraph.ParagraphProperties ??= new())
-           .ParagraphMarkRunProperties ??= new();
+        var properties = paragraph.ParagraphProperties ??= new();
+        properties.ParagraphMarkRunProperties ??= new();
 
         if (IsBold)
             properties.Content().GetOrAppend<Bold>();
@@ -75,8 +75,8 @@ public static class ExtensionsParagraph
 
     public static Paragraph Italic(this Paragraph paragraph, bool IsItalic = true)
     {
-        var properties = (paragraph.ParagraphProperties ??= new())
-           .ParagraphMarkRunProperties ??= new();
+        var properties = paragraph.ParagraphProperties ??= new();
+        properties.ParagraphMarkRunProperties ??= new();
 
         if (IsItalic)
             properties.Content().GetOrAppend<Italic>();
@@ -88,8 +88,8 @@ public static class ExtensionsParagraph
 
     public static Paragraph Underline(this Paragraph paragraph, bool IsUnderline = true)
     {
-        var properties = (paragraph.ParagraphProperties ??= new())
-           .ParagraphMarkRunProperties ??= new();
+        var properties = paragraph.ParagraphProperties ??= new();
+        properties.ParagraphMarkRunProperties ??= new();
 
         if (IsUnderline)
             properties.Content().GetOrAppend<Underline>();
@@ -101,8 +101,8 @@ public static class ExtensionsParagraph
 
     public static Paragraph Color(this Paragraph paragraph, string Color)
     {
-        var properties = (paragraph.ParagraphProperties ??= new())
-           .ParagraphMarkRunProperties ??= new();
+        var properties = paragraph.ParagraphProperties ??= new();
+        properties.ParagraphMarkRunProperties ??= new();
 
         if (string.IsNullOrEmpty(Color))
             properties.RemoveAllChildren<Color>();
@@ -114,8 +114,8 @@ public static class ExtensionsParagraph
 
     public static Paragraph FontSize(this Paragraph paragraph, int Size)
     {
-        var properties = (paragraph.ParagraphProperties ??= new())
-           .ParagraphMarkRunProperties ??= new();
+        var properties = paragraph.ParagraphProperties ??= new();
+        properties.ParagraphMarkRunProperties ??= new();
 
         if (Size <= 0)
             properties.RemoveAllChildren<FontSize>();

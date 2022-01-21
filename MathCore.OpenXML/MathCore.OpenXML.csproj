@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <ExplicitUsing>Enabled</ExplicitUsing>
-    <Version>0.0.4.1</Version>
+    <Version>0.0.4.2</Version>
     <PackageReleaseNotes>
       Движок шаблонов Word
     </PackageReleaseNotes>
