@@ -43,6 +43,15 @@ public static class Extensions
         return element;
     }
 
+    public static T FontSize<T>(this T element, int Size) where T : OpenXmlElement
+    {
+        foreach (var paragraph in element.Descendants<Paragraph>())
+            foreach (var run in paragraph.FontSize(Size).Elements<Run>())
+                run.FontSize(Size);
+
+        return element;
+    }
+
     internal static ElementAppender<T> Content<T>(this T element) where T : OpenXmlElement => new() { Element = element };
 
     internal readonly ref struct ElementAppender<T> where T : OpenXmlElement

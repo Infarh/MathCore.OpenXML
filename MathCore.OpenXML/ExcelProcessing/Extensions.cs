@@ -2,7 +2,7 @@
 
 using DocumentFormat.OpenXml;
 
-namespace MathCore.OpenXML
+namespace MathCore.OpenXML.ExcelProcessing
 {
     internal static class Extensions
     {
