@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
 
-namespace MathCore.OpenXML
+namespace MathCore.OpenXML.ExcelProcessing
 {
     /// <summary>Ячейка таблицы</summary>
     public readonly struct ExcelCell

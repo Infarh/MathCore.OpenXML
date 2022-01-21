@@ -7,7 +7,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 
-namespace MathCore.OpenXML
+namespace MathCore.OpenXML.ExcelProcessing
 {
     /// <summary>Лист файла данных</summary>
     public class ExcelSheet : IEnumerable<ExcelRow>

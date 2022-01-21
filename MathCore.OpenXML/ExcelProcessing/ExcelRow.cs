@@ -1,4 +1,5 @@
 ﻿#nullable enable
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Globalization;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
 
-namespace MathCore.OpenXML
+namespace MathCore.OpenXML.ExcelProcessing
 {
     /// <summary>Строка таблицы</summary>
     /// <remarks>Осуществляет однопроходный доступ к своим ячейкам в процессе чтения документа</remarks>
