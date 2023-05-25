@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace System.Linq
+namespace System.Linq;
+
+internal static class GroupingExtensions
 {
-    internal static class GroupingExtensions
+    public static void Deconstruct<TKey, TValue>(this IGrouping<TKey, TValue> Group, out TKey Key, out IEnumerable<TValue> Value)
     {
-        public static void Deconstruct<TKey, TValue>(this IGrouping<TKey, TValue> Group, out TKey Key, out IEnumerable<TValue> Value)
-        {
-            Key = Group.Key;
-            Value = Group;
-        }
+        Key = Group.Key;
+        Value = Group;
     }
 }
