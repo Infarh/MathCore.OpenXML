@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <ExplicitUsing>Enabled</ExplicitUsing>
-    <Version>0.0.4.4</Version>
+    <Version>0.0.4.5</Version>
     <PackageReleaseNotes>
       Обновление пакетов, исправление ошибки перечисления строк Excel без выборки ячеек
     </PackageReleaseNotes>
