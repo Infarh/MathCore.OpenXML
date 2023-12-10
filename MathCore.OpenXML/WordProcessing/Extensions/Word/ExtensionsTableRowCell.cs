@@ -8,14 +8,14 @@ public static class ExtensionsTableRowCell
     public static void Add(this TableCell cell, Paragraph paragraph) => cell.AppendChild(paragraph);
     public static void Add(this TableCell cell, string text) => cell.Add(new Paragraph { text });
 
-    public static TableCell Width(this TableCell Cell, int width, TableWidthUnitValues Type = TableWidthUnitValues.Dxa)
+    public static TableCell Width(this TableCell Cell, int width, TableWidthUnitValues? Type = null)
     {
         var width_properties = Cell.Content()
            .GetOrPrepend<TableCellProperties>().Content()
            .GetOrAppend<TableCellWidth>();
 
         width_properties.Width = width.ToString();
-        width_properties.Type = Type;
+        width_properties.Type = Type ?? TableWidthUnitValues.Dxa;
 
         return Cell;
     }
@@ -29,10 +29,10 @@ public static class ExtensionsTableRowCell
     internal static void Set(this BorderType Border,
         int Size,
         string Color = "auto",
-        BorderValues Value = BorderValues.Single,
+        BorderValues? Value = null,
         int Space = 0)
     {
-        Border.Val = Value;
+        Border.Val = Value ?? BorderValues.Single;
         Border.Color = Color;
         Border.Size = UInt32Value.FromUInt32((uint)Size);
         Border.Space = UInt32Value.FromUInt32((uint)Space);
@@ -53,48 +53,48 @@ public static class ExtensionsTableRowCell
     public static TableCell BorderLeft(this TableCell Cell,
         int Size = 6,
         string Color = "auto",
-        BorderValues Value = BorderValues.Single,
+        BorderValues? Value = null,
         int Space = 0)
     {
         Cell.GetBorderProperties()
            .Content()
-           .GetOrAppend<LeftBorder>().Set(Size, Color, Value, Space);
+           .GetOrAppend<LeftBorder>().Set(Size, Color, Value ?? BorderValues.Single, Space);
         return Cell;
     }
 
     public static TableCell BorderTop(this TableCell Cell,
         int Size = 6,
         string Color = "auto",
-        BorderValues Value = BorderValues.Single,
+        BorderValues? Value = null,
         int Space = 0)
     {
         Cell.GetBorderProperties()
            .Content()
-           .GetOrAppend<TopBorder>().Set(Size, Color, Value, Space);
+           .GetOrAppend<TopBorder>().Set(Size, Color, Value ?? BorderValues.Single, Space);
         return Cell;
     }
 
     public static TableCell BorderRight(this TableCell Cell,
         int Size = 6,
         string Color = "auto",
-        BorderValues Value = BorderValues.Single,
+        BorderValues? Value = null,
         int Space = 0)
     {
         Cell.GetBorderProperties()
            .Content()
-           .GetOrAppend<RightBorder>().Set(Size, Color, Value, Space);
+           .GetOrAppend<RightBorder>().Set(Size, Color, Value ?? BorderValues.Single, Space);
         return Cell;
     }
 
     public static TableCell BorderBottom(this TableCell Cell,
         int Size = 6,
         string Color = "auto",
-        BorderValues Value = BorderValues.Single,
+        BorderValues? Value = null,
         int Space = 0)
     {
         Cell.GetBorderProperties()
            .Content()
-           .GetOrAppend<BottomBorder>().Set(Size, Color, Value, Space);
+           .GetOrAppend<BottomBorder>().Set(Size, Color, Value ?? BorderValues.Single, Space);
         return Cell;
     } 
 

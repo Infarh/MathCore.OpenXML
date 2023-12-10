@@ -47,7 +47,7 @@ public static class ExtensionsParagraph
         int Before,
         int After = 0,
         int Line = 240,
-        LineSpacingRuleValues LineRile = LineSpacingRuleValues.Auto)
+        LineSpacingRuleValues? LineRile = null)
     {
         var spacing = (paragraph.ParagraphProperties ??= new()).SpacingBetweenLines ??= new();
 
@@ -55,7 +55,7 @@ public static class ExtensionsParagraph
         if (Before > 0) spacing.Before = Before.ToString();
         if (After > 0) spacing.After = After.ToString();
         if (Line > 0) spacing.Line = Line.ToString();
-        spacing.LineRule = LineRile;
+        spacing.LineRule = LineRile ?? LineSpacingRuleValues.Auto;
 
         return paragraph;
     }
