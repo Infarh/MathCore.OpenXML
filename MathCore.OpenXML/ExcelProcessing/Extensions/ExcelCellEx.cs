@@ -1,14 +1,20 @@
 ﻿using System.Linq;
 using System.Text;
+
 using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace MathCore.OpenXML.ExcelProcessing.Extensions;
 
 public static class ExcelCellEx
 {
-    public static Cell Add(this Cell cell, string text)
+    public static Cell InlineText(this Cell cell, string text)
     {
-        var inline_string = cell.ChildElements.OfType<InlineString>().FirstOrDefault() ?? cell.AppendChild(new InlineString());
+        if (cell.ChildElements.OfType<InlineString>().FirstOrDefault() is not { } inline_string)
+        {
+            inline_string = new();
+            cell.Append(inline_string);
+            cell.DataType = CellValues.InlineString;
+        }
 
         if (inline_string.ChildElements.OfType<Text>().FirstOrDefault() is { } text_item)
             text_item.Text = text;
@@ -32,10 +38,10 @@ public static class ExcelCellEx
 
         var result = new StringBuilder(3);
 
-        if (first_letter > symbol_base_index) 
+        if (first_letter > symbol_base_index)
             result.Append((char)first_letter);
 
-        if (second_letter > symbol_base_index) 
+        if (second_letter > symbol_base_index)
             result.Append((char)second_letter);
 
         result.Append((char)third_letter);
@@ -57,10 +63,10 @@ public static class ExcelCellEx
 
         var result = new StringBuilder(6);
 
-        if (first_letter > symbol_base_index) 
+        if (first_letter > symbol_base_index)
             result.Append((char)first_letter);
 
-        if (second_letter > symbol_base_index) 
+        if (second_letter > symbol_base_index)
             result.Append((char)second_letter);
 
         result.Append((char)third_letter);
@@ -85,5 +91,12 @@ public static class ExcelCellEx
         }
 
         return index;
+    }
+
+    public static Cell Bold(this Cell cell)
+    {
+
+
+        return cell;
     }
 }

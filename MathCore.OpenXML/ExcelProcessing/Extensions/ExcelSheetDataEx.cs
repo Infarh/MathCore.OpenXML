@@ -20,4 +20,11 @@ public static class ExcelSheetDataEx
         data.AppendChild(row);
         return data;
     }
+
+    public static Row CreateRow(this SheetData data)
+    {
+        var row = new Row();
+        data.Add(row);
+        return row;
+    }
 }

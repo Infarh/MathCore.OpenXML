@@ -20,4 +20,11 @@ public static class ExcelRowEx
         row.AppendChild(cell);
         return row;
     }
+
+    public static Cell CreateCell(this Row row)
+    {
+        var cell = new Cell();
+        row.Add(cell);
+        return cell;
+    }
 }

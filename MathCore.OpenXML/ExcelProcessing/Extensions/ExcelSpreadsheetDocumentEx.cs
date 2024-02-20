@@ -8,41 +8,24 @@ public static class ExcelSpreadsheetDocumentEx
     public static SpreadsheetDocument Initialize(
         this SpreadsheetDocument document,
         out WorkbookPart WorkbookPart,
-        out WorksheetPart WorksheetPart)
+        out (WorksheetPart Part, SheetData Rows) Sheet1)
     {
         WorkbookPart = document.AddWorkbookPart();
         WorkbookPart.Workbook = new();
 
-        WorkbookPart.AddNewPart<WorkbookStylesPart>().Stylesheet = new();
+        var sheet1_part = WorkbookPart.AddNewPart<WorksheetPart>();
+        var sheet1_data = new SheetData();
+        sheet1_part.Worksheet = new(sheet1_data);
 
-        WorksheetPart = WorkbookPart.AddNewPart<WorksheetPart>();
-        WorksheetPart.Worksheet = new(new SheetData());
+        Sheet1 = (sheet1_part, sheet1_data);
 
         var sheets = WorkbookPart.Workbook.AppendChild(new Sheets());
         sheets.AppendChild(new Sheet
         {
-            Id = WorkbookPart.GetIdOfPart(WorksheetPart),
+            Id = WorkbookPart.GetIdOfPart(sheet1_part),
             SheetId = 1,
-            Name = "Лист 1"
+            Name = "Лист 123"
         });
-
-        return document;
-    }
-
-    public static SpreadsheetDocument Initialize(
-        this SpreadsheetDocument document,
-        out WorkbookPart WorkbookPart,
-        out WorksheetPart WorksheetPart,
-        out WorkbookStylesPart WorkbookStylesPart)
-    {
-        WorkbookPart = document.AddWorkbookPart();
-        WorkbookPart.Workbook = new();
-
-        WorkbookStylesPart = WorkbookPart.AddNewPart<WorkbookStylesPart>();
-        WorkbookStylesPart.Stylesheet = new();
-
-        WorksheetPart = WorkbookPart.AddNewPart<WorksheetPart>();
-        WorksheetPart.Worksheet = new(new SheetData());
 
         return document;
     }

@@ -53,7 +53,7 @@ namespace ConsoleTest
 
         static void Main(string[] args)
         {
-            ExcelWriterTest.Run();
+            ExcelWriterTest.Run1();
 
             return;
 
