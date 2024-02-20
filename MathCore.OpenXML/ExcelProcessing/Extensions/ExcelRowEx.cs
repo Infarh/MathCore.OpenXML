@@ -27,4 +27,6 @@ public static class ExcelRowEx
         row.Add(cell);
         return cell;
     }
+
+    public static InlineString CreateCell(this Row row, string text) => row.CreateCell().InlineText(text);
 }
