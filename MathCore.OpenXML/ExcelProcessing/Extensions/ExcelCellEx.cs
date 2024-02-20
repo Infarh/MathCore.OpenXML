@@ -7,7 +7,7 @@ namespace MathCore.OpenXML.ExcelProcessing.Extensions;
 
 public static class ExcelCellEx
 {
-    public static Cell InlineText(this Cell cell, string text)
+    public static InlineString InlineText(this Cell cell, string text)
     {
         if (cell.ChildElements.OfType<InlineString>().FirstOrDefault() is not { } inline_string)
         {
@@ -21,7 +21,7 @@ public static class ExcelCellEx
         else
             inline_string.Append(new Text(text));
 
-        return cell;
+        return inline_string;
     }
 
     public static string GetCellRowIndex(int ColumnIndex)
@@ -81,22 +81,13 @@ public static class ExcelCellEx
         var index = 0;
         foreach (var c in CellReference)
         {
-            if (char.IsLetter(c))
-            {
-                index *= 26;
-                index += c - 'A' + 1;
-            }
-            else
+            if (!char.IsLetter(c))
                 break;
+
+            index *= 26;
+            index += c - 'A' + 1;
         }
 
         return index;
-    }
-
-    public static Cell Bold(this Cell cell)
-    {
-
-
-        return cell;
     }
 }
