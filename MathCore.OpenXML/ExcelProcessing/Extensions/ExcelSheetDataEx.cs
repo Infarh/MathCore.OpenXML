@@ -16,7 +16,6 @@ public static class ExcelSheetDataEx
         }
 
         row.RowIndex = last_row is { RowIndex.Value: var last_row_index } ? last_row_index + 1 : 1U;
-        //row.Spans = new() { InnerText = "1:1" };
 
         data.AppendChild(row);
         return data;
