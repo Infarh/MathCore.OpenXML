@@ -7,6 +7,7 @@ using System.Globalization;
 
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
+using MathCore.OpenXML.ExcelProcessing.Extensions;
 
 namespace MathCore.OpenXML.ExcelProcessing;
 

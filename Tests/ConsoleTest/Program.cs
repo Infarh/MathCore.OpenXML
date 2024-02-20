@@ -53,6 +53,10 @@ namespace ConsoleTest
 
         static void Main(string[] args)
         {
+            ExcelWriterTest.Run();
+
+            return;
+
             var template_file = new FileInfo("Document.docx");
             var document_file = new FileInfo("doc.docx");
 
