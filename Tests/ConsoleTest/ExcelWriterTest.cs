@@ -25,7 +25,7 @@ public static class ExcelWriterTest
             .AppendChild(new Sheets())
             .Append(new Sheet { Id = workbook_part.GetIdOfPart(worksheet1_part), SheetId = 1, Name = "List 1" });
 
-        var cell = new Cell(new InlineString(new Text { Text = "Inline cell value" }))
+        var cell = new Cell(new InlineString(new Text("Inline cell value 1")))
         {
             CellReference = "A1",
             DataType = CellValues.InlineString

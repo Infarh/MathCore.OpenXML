@@ -9,8 +9,11 @@ public static class ExcelCellEx
     public static Cell Add(this Cell cell, string text)
     {
         var inline_string = cell.ChildElements.OfType<InlineString>().FirstOrDefault() ?? cell.AppendChild(new InlineString());
-        var text_item = inline_string.ChildElements.OfType<Text>().FirstOrDefault() ?? inline_string.AppendChild(new Text());
-        text_item.Text = text;
+
+        if (inline_string.ChildElements.OfType<Text>().FirstOrDefault() is { } text_item)
+            text_item.Text = text;
+        else
+            inline_string.Append(new Text(text));
 
         return cell;
     }
@@ -19,9 +22,9 @@ public static class ExcelCellEx
     {
         ColumnIndex--;
 
-        const int latin_alphabet_len = 26;
+        const int latin_alphabet_len = 'Z' - 'A' + 1;
         const int latin_alphabet_len2 = latin_alphabet_len * latin_alphabet_len;
-        const int symbol_base_index = 64;
+        const int symbol_base_index = 'A' - 1;
 
         var first_letter = symbol_base_index + ColumnIndex / latin_alphabet_len2;
         var second_letter = symbol_base_index + ColumnIndex % latin_alphabet_len2 / latin_alphabet_len;
@@ -29,10 +32,10 @@ public static class ExcelCellEx
 
         var result = new StringBuilder(3);
 
-        if (first_letter > 64) 
+        if (first_letter > symbol_base_index) 
             result.Append((char)first_letter);
 
-        if (second_letter > 64) 
+        if (second_letter > symbol_base_index) 
             result.Append((char)second_letter);
 
         result.Append((char)third_letter);
@@ -40,13 +43,13 @@ public static class ExcelCellEx
         return result.ToString();
     }
 
-    public static string GetCellIndex(int RowIndex, int ColumnIndex)
+    public static string GetCellReference(int RowIndex, int ColumnIndex)
     {
         ColumnIndex--;
 
-        const int latin_alphabet_len = 26;
+        const int latin_alphabet_len = 'Z' - 'A' + 1;
         const int latin_alphabet_len2 = latin_alphabet_len * latin_alphabet_len;
-        const int symbol_base_index = 64;
+        const int symbol_base_index = 'A' - 1;
 
         var first_letter = symbol_base_index + ColumnIndex / latin_alphabet_len2;
         var second_letter = symbol_base_index + ColumnIndex % latin_alphabet_len2 / latin_alphabet_len;
@@ -54,10 +57,10 @@ public static class ExcelCellEx
 
         var result = new StringBuilder(6);
 
-        if (first_letter > 64) 
+        if (first_letter > symbol_base_index) 
             result.Append((char)first_letter);
 
-        if (second_letter > 64) 
+        if (second_letter > symbol_base_index) 
             result.Append((char)second_letter);
 
         result.Append((char)third_letter);
@@ -65,5 +68,22 @@ public static class ExcelCellEx
         result.Append(RowIndex);
 
         return result.ToString();
+    }
+
+    public static int GetCellRowIndex(string CellReference)
+    {
+        var index = 0;
+        foreach (var c in CellReference)
+        {
+            if (char.IsLetter(c))
+            {
+                index *= 26;
+                index += c - 'A' + 1;
+            }
+            else
+                break;
+        }
+
+        return index;
     }
 }
