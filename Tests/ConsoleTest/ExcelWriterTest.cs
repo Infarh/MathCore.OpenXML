@@ -1,6 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Spreadsheet;
 using MathCore.OpenXML.ExcelProcessing.Extensions;
 
 namespace ConsoleTest;
@@ -14,7 +13,7 @@ public static class ExcelWriterTest
 
         using var document = SpreadsheetDocument
             .Create(file.FullName, SpreadsheetDocumentType.Workbook)
-            .Initialize(out var workbook_part, out var sheet1);
+            .Initialize(out var sheet1);
 
         var header_row = sheet1.Rows.CreateRow();
 
