@@ -15,12 +15,12 @@ public static class ExcelWriterTest
             .Create(file.FullName, SpreadsheetDocumentType.Workbook)
             .Initialize(out var sheet1);
 
-        var header_row = sheet1.Rows.CreateRow();
+        var sheet1_header_row = sheet1.CreateRow();
 
         string[] headers = ["Id", "User", "Phone"];
 
         foreach (var header in headers) 
-            header_row.CreateCell(header).Bold();
+            sheet1_header_row.CreateCell(header).Bold();
 
         UserInfo[] users =
         [
@@ -36,6 +36,10 @@ public static class ExcelWriterTest
             user_row.CreateCell().InlineText(name);
             user_row.CreateCell().InlineText(phone);
         }
+
+        var sheet2 = document.CreateSheet("List-2");
+
+        sheet2.CreateRow().CreateCell("Value2").Bold();
 
         document.Save();
         file.ShowInExplorer();
