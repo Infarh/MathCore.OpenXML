@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <ExplicitUsing>Enabled</ExplicitUsing>
-    <Version>0.0.5.2</Version>
+    <Version>0.0.5.3</Version>
     <PackageReleaseNotes>
       Механизм формирования Excel-документа
     </PackageReleaseNotes>
@@ -24,7 +24,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DocumentFormat.OpenXml" Version="3.0.0" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
   </ItemGroup>
 
 </Project>
