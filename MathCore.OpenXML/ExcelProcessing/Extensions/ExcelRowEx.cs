@@ -1,4 +1,6 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
+﻿using System;
+
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace MathCore.OpenXML.ExcelProcessing.Extensions;
 
@@ -20,7 +22,7 @@ public static class ExcelRowEx
         row.AppendChild(cell);
         return row;
     }
-
+    
     public static Cell CreateCell(this Row row)
     {
         var cell = new Cell();
@@ -29,4 +31,10 @@ public static class ExcelRowEx
     }
 
     public static InlineString CreateCell(this Row row, string text) => row.CreateCell().InlineText(text);
+
+    public static Cell CreateCell(this Row row, double value) => row.CreateCell().Value(value);
+    public static Cell CreateCell(this Row row, uint value) => row.CreateCell().Value(value);
+    public static Cell CreateCell(this Row row, int value) => row.CreateCell().Value(value);
+    //public static Cell CreateCell(this Row row, DateTime value) => row.CreateCell().Value(value);
+    //public static Cell CreateCell(this Row row, bool value) => row.CreateCell().Value(value);
 }

@@ -1,7 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Globalization;
+using System.Linq;
 using System.Text;
 
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
+
+using MathCore.OpenXML.WordProcessing.Extensions.Word;
 
 namespace MathCore.OpenXML.ExcelProcessing.Extensions;
 
@@ -90,4 +95,58 @@ public static class ExcelCellEx
 
         return index;
     }
+
+    public static Cell SharedString(this Cell cell, int StringIndex)
+    {
+        cell.RemoveAllChildren();
+        cell.DataType = CellValues.SharedString;
+        cell.CellValue = new(StringIndex.ToString());
+
+        return cell;
+    }
+
+    public static Cell Value(this Cell cell, double value)
+    {
+        cell.RemoveAllChildren();
+        cell.DataType = CellValues.Number;
+        cell.CellValue = new(value.ToString(CultureInfo.InvariantCulture));
+
+        return cell;
+    }
+
+    public static Cell Value(this Cell cell, uint value)
+    {
+        cell.RemoveAllChildren();
+        cell.DataType = CellValues.Number;
+        cell.CellValue = new(value.ToString());
+
+        return cell;
+    }
+
+    public static Cell Value(this Cell cell, int value)
+    {
+        cell.RemoveAllChildren();
+        cell.DataType = CellValues.Number;
+        cell.CellValue = new(value.ToString());
+
+        return cell;
+    }
+
+    //public static Cell Value(this Cell cell, DateTime value)
+    //{
+    //    cell.RemoveAllChildren();
+    //    cell.DataType = new EnumValue<CellValues>(CellValues.Date);
+    //    cell.CellValue = new(value.ToString("yyyy-MM-dd HH:mm:ss"));
+
+    //    return cell;
+    //}
+
+    //public static Cell Value(this Cell cell, bool value)
+    //{
+    //    cell.RemoveAllChildren();
+    //    cell.DataType = CellValues.Boolean;
+    //    cell.CellValue = new(value.ToString());
+
+    //    return cell;
+    //}
 }

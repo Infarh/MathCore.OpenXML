@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 using DocumentFormat.OpenXml.Office2016.Excel;
 using DocumentFormat.OpenXml.Packaging;
@@ -59,7 +60,7 @@ public static class ExcelSpreadsheetDocumentEx
 
     public static (WorksheetPart Part, SheetData Rows) CreateSheet(this SpreadsheetDocument document, string SheetName)
     {
-        if(document.WorkbookPart is not { } workbook_part)
+        if (document.WorkbookPart is not { } workbook_part)
         {
             workbook_part = document.AddWorkbookPart();
             workbook_part.Workbook = new();
@@ -79,5 +80,58 @@ public static class ExcelSpreadsheetDocumentEx
         });
 
         return (sheet_part, sheet_data);
+    }
+
+    public static SharedStringTableProvider GetSharedStringTable(this SpreadsheetDocument document)
+    {
+        if (document.WorkbookPart!.GetPartsOfType<SharedStringTablePart>().FirstOrDefault() is not { } shared_string_table_part)
+        {
+            shared_string_table_part = document.WorkbookPart.AddNewPart<SharedStringTablePart>();
+            shared_string_table_part.SharedStringTable = new();
+        }
+
+        return new(shared_string_table_part);
+    }
+}
+
+public class SharedStringTableProvider(SharedStringTablePart SharedStringTablePart)
+{
+    private Dictionary<string, int> _Index = new();
+
+    private int _MaxIndex = 0;
+
+    public int this[string str]
+    {
+        get
+        {
+            if (_Index.TryGetValue(str, out var index))
+                return index;
+
+            if (_MaxIndex != SharedStringTablePart.SharedStringTable.ChildElements.Count)
+            {
+                Refresh();
+                return this[str];
+            }
+
+            SharedStringTablePart.SharedStringTable.Append(new SharedStringItem(new Text(str)));
+            SharedStringTablePart.SharedStringTable.Save();
+            index = SharedStringTablePart.SharedStringTable.ChildElements.Count - 1;
+
+            _Index[str] = index;
+
+            _MaxIndex = index + 1;
+            return index;
+        }
+    }
+
+    public void Refresh()
+    {
+        var index = new Dictionary<string, int>(SharedStringTablePart.SharedStringTable.ChildElements.Count);
+        var i = 1;
+        foreach (SharedStringItem item in SharedStringTablePart.SharedStringTable.ChildElements)
+            index[item.InnerText] = i++;
+
+        _Index = index;
+        _MaxIndex = SharedStringTablePart.SharedStringTable.ChildElements.Count;
     }
 }
