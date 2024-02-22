@@ -4,22 +4,22 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <ExplicitUsing>Enabled</ExplicitUsing>
-    <Version>0.0.5.3</Version>
+    <Version>0.0.5.4</Version>
     <PackageReleaseNotes>
       Механизм формирования Excel-документа
     </PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup>
-    <Authors>shmachilin@gmail.com</Authors>
-    <Company>shmachilin@gmail.com</Company>
+    <Authors>shmachilin@yandex.ru</Authors>
+    <Company>shmachilin@yandex.ru</Company>
     <Description>Библиотека для упрощения доступа к функциям документов OpenXML</Description>
-    <Copyright>shmachilin@gmail.com</Copyright>
+    <Copyright>shmachilin@yandex.ru</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Infarh/MathCore.OpenXML</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Infarh/MathCore.OpenXML.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>OpenXML, Excel, xlsx</PackageTags>
+    <PackageTags>OpenXML;Excel;Word;xlsx;docx</PackageTags>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
