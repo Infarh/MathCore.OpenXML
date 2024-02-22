@@ -19,7 +19,7 @@
     <PackageProjectUrl>https://github.com/Infarh/MathCore.OpenXML</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Infarh/MathCore.OpenXML.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>OpenXML, Excel, xlsx</PackageTags>
+    <PackageTags>OpenXML;Excel;Word;xlsx;docx</PackageTags>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
