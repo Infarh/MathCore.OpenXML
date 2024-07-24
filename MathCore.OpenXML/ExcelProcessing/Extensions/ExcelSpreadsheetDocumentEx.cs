@@ -11,7 +11,8 @@ public static class ExcelSpreadsheetDocumentEx
 {
     public static SpreadsheetDocument Initialize(
         this SpreadsheetDocument document,
-        out (WorksheetPart Part, SheetData Rows) Sheet1)
+        out (WorksheetPart Part, SheetData Rows) Sheet1, 
+        string SheetName = "List 1")
     {
         var workbook_part = document.AddWorkbookPart();
         workbook_part.Workbook = new();
@@ -27,7 +28,7 @@ public static class ExcelSpreadsheetDocumentEx
         {
             Id = workbook_part.GetIdOfPart(sheet1_part),
             SheetId = 1,
-            Name = "Лист 123"
+            Name = SheetName
         });
 
         return document;
@@ -36,7 +37,8 @@ public static class ExcelSpreadsheetDocumentEx
     public static SpreadsheetDocument Initialize(
         this SpreadsheetDocument document,
         out WorkbookPart WorkbookPart,
-        out (WorksheetPart Part, SheetData Rows) Sheet1)
+        out (WorksheetPart Part, SheetData Rows) Sheet1,
+        string SheetName = "List 1")
     {
         WorkbookPart = document.AddWorkbookPart();
         WorkbookPart.Workbook = new();
@@ -52,7 +54,7 @@ public static class ExcelSpreadsheetDocumentEx
         {
             Id = WorkbookPart.GetIdOfPart(sheet1_part),
             SheetId = 1,
-            Name = "Лист 123"
+            Name = SheetName
         });
 
         return document;
@@ -96,7 +98,7 @@ public static class ExcelSpreadsheetDocumentEx
 
 public class SharedStringTableProvider(SharedStringTablePart SharedStringTablePart)
 {
-    private Dictionary<string, int> _Index = new();
+    private Dictionary<string, int> _Index = [];
 
     private int _MaxIndex = 0;
 

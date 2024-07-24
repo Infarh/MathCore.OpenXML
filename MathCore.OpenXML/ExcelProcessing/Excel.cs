@@ -7,11 +7,18 @@ using System.Linq;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 
+using MathCore.OpenXML.ExcelProcessing.Extensions;
+
 namespace MathCore.OpenXML.ExcelProcessing;
 
 /// <summary>Файл данных</summary>
 public class Excel : IEnumerable<ExcelSheet>
 {
+    public static SpreadsheetDocument Create(string FilePath, (WorksheetPart Part, SheetData Rows) Sheet, string SheetName = "List 1") => 
+        SpreadsheetDocument
+            .Create(FilePath, DocumentFormat.OpenXml.SpreadsheetDocumentType.Workbook)
+            .Initialize(out Sheet, SheetName);
+
     public static Excel File(FileInfo file) => File(file.FullName);
 
     /// <summary>Открыть файл данных для чтения</summary>

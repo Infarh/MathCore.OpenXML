@@ -4,9 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <ExplicitUsing>Enabled</ExplicitUsing>
-    <Version>0.0.5.4</Version>
+    <Version>0.0.5.5</Version>
     <PackageReleaseNotes>
       Механизм формирования Excel-документа
+      Добавлена возможность перечисления всех полей документа
     </PackageReleaseNotes>
   </PropertyGroup>
 
@@ -24,7 +25,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.*" />
   </ItemGroup>
 
 </Project>

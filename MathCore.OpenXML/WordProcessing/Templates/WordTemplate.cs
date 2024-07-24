@@ -43,6 +43,30 @@ public class WordTemplate
         return this;
     }
 
+    public IEnumerable<(string tag, string? alias, string text)> EnumerateFields()
+    {
+        using var document = WordprocessingDocument.Open(_TemplateFile.FullName, true);
+        var word_main_document_part = document.MainDocumentPart ?? throw new InvalidOperationException("Отсутствует основная часть документа");
+
+        var document_body_fields = word_main_document_part.Document.GetFields();
+        var headers_fields = document.MainDocumentPart.HeaderParts.SelectMany(static h => h.Header.GetFields());
+        var footers_fields = document.MainDocumentPart.FooterParts.SelectMany(static f => f.Footer.GetFields());
+
+        var document_fields = document_body_fields
+              .Concat(headers_fields)
+              .Concat(footers_fields)
+              .Select(f => (Tag: f.GetTag()!, Field: f))
+              .Where(f => f.Tag is { Length: > 0 });
+
+        foreach (var (tag, field) in document_fields)
+        {
+            var alias = field.GetFirstChild<SdtProperties>()?.GetFirstChild<SdtAlias>()?.Val;
+            var text = field.InnerText;
+
+            yield return (tag, alias, text);
+        }
+    }
+
     public FileInfo SaveTo(string FilePath) => SaveTo(new FileInfo(FilePath));
 
     public FileInfo SaveTo(FileInfo File)
