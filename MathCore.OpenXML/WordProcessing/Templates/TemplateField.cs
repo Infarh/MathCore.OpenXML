@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-using DocumentFormat.OpenXml.Wordprocessing;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace MathCore.OpenXML.WordProcessing.Templates;
 

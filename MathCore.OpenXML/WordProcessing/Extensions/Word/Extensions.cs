@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-using DocumentFormat.OpenXml;
+﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace MathCore.OpenXML.WordProcessing.Extensions.Word;

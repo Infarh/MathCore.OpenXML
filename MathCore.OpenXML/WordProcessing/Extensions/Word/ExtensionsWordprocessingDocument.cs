@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using DocumentFormat.OpenXml.Packaging;
+﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace MathCore.OpenXML.WordProcessing.Extensions.Word;
@@ -22,25 +18,6 @@ public static class ExtensionsWordprocessingDocument
               .Where(f => f.Tag is { Length: > 0 });
 
         foreach (var (tag, field) in document_fields)
-        {
-            var alias = field.GetFirstChild<SdtProperties>()?.GetFirstChild<SdtAlias>()?.Val?.Value;
-            var text = field.InnerText;
-
-            yield return (tag, alias, text);
-        }
-    }
-}
-
-public static class ExetnsionsOpenXmlPackage
-{
-    public static IEnumerable<(string? tag, string? alias, string text)> EnumerateFields(this OpenXmlPackage package)
-    {
-        var fields = package.Parts.SelectMany(p => p.OpenXmlPart.RootElement.GetFields())
-              .Select(f => (Tag: f.GetTag()!, Field: f))
-              .Where(f => f.Tag is { Length: > 0 });
-        ;
-
-        foreach (var (tag, field) in fields)
         {
             var alias = field.GetFirstChild<SdtProperties>()?.GetFirstChild<SdtAlias>()?.Val?.Value;
             var text = field.InnerText;

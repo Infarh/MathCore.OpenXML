@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-using MathCore.OpenXML.WordProcessing.Templates;
+﻿using MathCore.OpenXML.WordProcessing.Templates;
 
 namespace MathCore.OpenXML.WordProcessing;
 

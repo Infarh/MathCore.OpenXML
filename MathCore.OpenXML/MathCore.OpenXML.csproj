@@ -22,10 +22,15 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>OpenXML;Excel;Word;xlsx;docx</PackageTags>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="MathCore.OpenXML.Infrastructure.Extensions" />
   </ItemGroup>
 
 </Project>

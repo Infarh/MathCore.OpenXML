@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Presentation;
+﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
 using MathCore.OpenXML.WordProcessing.Extensions.Word;
@@ -15,7 +9,7 @@ public class WordTemplate
 {
     private readonly FileInfo _TemplateFile;
 
-    private readonly Dictionary<string, TemplateField> _Fields = new();
+    private readonly Dictionary<string, TemplateField> _Fields = [];
 
     private bool _RemoveUnprocessedFields;
     private bool _ReplaceFieldsWithValues;
@@ -182,7 +176,7 @@ public class WordTemplate
 
     public WordTemplate Field<T>(string FieldName, IReadOnlyCollection<T>? Values, Action<IFieldValueSetter, T>? Setter)
     {
-        if (Values is not { Count: > 0 })
+        if (Values is not { Count: > 0 } || Setter is null)
             _Fields.Remove(FieldName);
         else
             _Fields[FieldName] = TemplateFieldBlockValue.Create(FieldName, Values, Setter);
