@@ -52,7 +52,7 @@ public class WordTemplate
 
         foreach (var (tag, field) in document_fields)
         {
-            var alias = field.GetFirstChild<SdtProperties>()?.GetFirstChild<SdtAlias>()?.Val?.Value;
+            var alias = field.GetAlias();
             var text = field.InnerText;
 
             yield return new(text)
