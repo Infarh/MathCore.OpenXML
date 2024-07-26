@@ -1,9 +1,11 @@
-﻿using System.Globalization;
-using ConsoleTest.Models;
+﻿using ConsoleTest.Models;
+
 using MathCore.OpenXML.WordProcessing;
 
-var template_file = new FileInfo("Document.docx");
-var document_file = new FileInfo("doc.docx");
+using System.Globalization;
+
+var template_file = new FileInfo("Document.docx").ThrowIfNotFound();
+var document_file = new FileInfo("doc.docx").EnsureDeleted();
 
 var products = Product.Test(rnd: new Random()).ToArray();
 
@@ -29,9 +31,19 @@ var template = Word.Template(template_file)
            .Field("ProductPrice", product.Price)
            .Field("ProductFeature", product.Features, (feature_row, feature) => feature_row
                .Value(feature.Description)))
+       .Field("FooterFileInfo", "Смета №1")
        .RemoveUnprocessedFields()
        .ReplaceFieldsWithValues()
     ;
 
-var file = template.SaveTo(document_file);
-file.Execute();
+var fields = template.EnumerateFields().ToArray();
+
+//using (var stream = document_file.Create())
+//    template.SaveTo(stream);
+
+template.SaveTo(document_file);
+
+document_file.Execute();
+
+Console.WriteLine("End.");
+return;

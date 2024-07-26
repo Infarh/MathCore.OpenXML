@@ -33,4 +33,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="ConsoleTest.Infrastructure" />
+  </ItemGroup>
+
 </Project>
