@@ -74,9 +74,9 @@ public class WordTemplate
     {
         try
         {
-            File.Delete();
+            _TemplateFile.CopyTo(File.FullName, true);
 
-            using var document = WordprocessingDocument.Open(_TemplateFile.FullName, true, new() { AutoSave = false });
+            using var document = WordprocessingDocument.Open(File.FullName, true, new() { AutoSave = false });
             var word_main_document_part = document.MainDocumentPart ?? throw new InvalidOperationException("Отсутствует основная часть документа");
 
             var document_body_fields = word_main_document_part.Document.GetFields();
@@ -97,9 +97,13 @@ public class WordTemplate
 
             unprocessed?.ForEach(static e => e.Remove());
 
-            var clone_doc = document.Clone(File.FullName, false, new() { AutoSave = false });
+            document.Save();
 
             return File;
+        }
+        catch (IOException)
+        {
+            throw;
         }
         catch
         {
@@ -110,32 +114,6 @@ public class WordTemplate
         {
             File.Refresh();
         }
-    }
-
-    public void SaveTo(Stream steram)
-    {
-        using var document = WordprocessingDocument.Open(_TemplateFile.FullName, true, new() { AutoSave = false });
-        var word_main_document_part = document.MainDocumentPart ?? throw new InvalidOperationException("Отсутствует основная часть документа");
-
-        var document_body_fields = word_main_document_part.Document.GetFields();
-        var parts_fields = word_main_document_part.Parts.SelectMany(p => p.OpenXmlPart.RootElement.GetFields());
-
-        var document_fields = document_body_fields
-           .Concat(parts_fields)
-           .Select(f => (Tag: f.GetTag(), Field: f))
-           .Where(f => f.Tag is { Length: > 0 })
-           .GroupBy(f => f.Tag, f => f.Field);
-
-        var unprocessed = _RemoveUnprocessedFields ? new List<SdtElement>() : null;
-        foreach (var (tag, fields) in document_fields)
-            if (_Fields.TryGetValue(tag!, out var template))
-                template.Process(fields, _ReplaceFieldsWithValues);
-            else
-                unprocessed?.AddRange(fields);
-
-        unprocessed?.ForEach(static e => e.Remove());
-
-        document.Clone(steram, false, new() { AutoSave = false });
     }
 
     public WordTemplate Field(string FieldName, string? FieldValue)
