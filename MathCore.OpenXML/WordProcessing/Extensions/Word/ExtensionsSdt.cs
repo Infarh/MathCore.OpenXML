@@ -47,13 +47,13 @@ public static class ExtensionsSdt
             ?? throw new InvalidOperationException("Не найден узел с параметрами");
 
         var tag = properties.Elements<Tag>().FirstOrDefault();
-        return tag?.Val?.Value;
+        return tag?.Val?.Value?.Trim();
     }
 
     public static string? GetAlias(this SdtElement run)
     {
         var properties = run.GetFirstChild<SdtProperties>()!;
-        var aliace = properties.GetFirstChild<SdtAlias>()!.Val?.Value;
+        var aliace = properties.GetFirstChild<SdtAlias>()?.Val?.Value?.Trim();
         return aliace;
     }
 

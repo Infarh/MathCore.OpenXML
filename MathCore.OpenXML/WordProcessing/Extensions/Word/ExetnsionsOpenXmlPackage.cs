@@ -14,7 +14,7 @@ public static class ExetnsionsOpenXmlPackage
 
         foreach (var (tag, field) in fields)
         {
-            var alias = field.GetFirstChild<SdtProperties>()?.GetFirstChild<SdtAlias>()?.Val?.Value;
+            var alias = field.GetAlias();
             var text = field.InnerText;
 
             yield return (tag, alias, text);
