@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Presentation;
+﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
 using MathCore.OpenXML.WordProcessing.Extensions.Word;
@@ -15,7 +9,7 @@ public class WordTemplate
 {
     private readonly FileInfo _TemplateFile;
 
-    private readonly Dictionary<string, TemplateField> _Fields = new();
+    private readonly Dictionary<string, TemplateField> _Fields = [];
 
     private bool _RemoveUnprocessedFields;
     private bool _ReplaceFieldsWithValues;
@@ -43,29 +37,36 @@ public class WordTemplate
         return this;
     }
 
-    public IEnumerable<(string tag, string? alias, string text)> EnumerateFields()
+    public IEnumerable<WordTemplateFieldInfo> EnumerateFields()
     {
         using var document = WordprocessingDocument.Open(_TemplateFile.FullName, true);
         var word_main_document_part = document.MainDocumentPart ?? throw new InvalidOperationException("Отсутствует основная часть документа");
 
         var document_body_fields = word_main_document_part.Document.GetFields();
-        var headers_fields = document.MainDocumentPart.HeaderParts.SelectMany(static h => h.Header.GetFields());
-        var footers_fields = document.MainDocumentPart.FooterParts.SelectMany(static f => f.Footer.GetFields());
+        var parts_fields = word_main_document_part.Parts.SelectMany(p => p.OpenXmlPart.RootElement.GetFields());
 
         var document_fields = document_body_fields
-              .Concat(headers_fields)
-              .Concat(footers_fields)
+              .Concat(parts_fields)
               .Select(f => (Tag: f.GetTag()!, Field: f))
               .Where(f => f.Tag is { Length: > 0 });
 
         foreach (var (tag, field) in document_fields)
         {
-            var alias = field.GetFirstChild<SdtProperties>()?.GetFirstChild<SdtAlias>()?.Val;
+            var alias = field.GetFirstChild<SdtProperties>()?.GetFirstChild<SdtAlias>()?.Val?.Value;
             var text = field.InnerText;
 
-            yield return (tag, alias, text);
+            yield return new(text)
+            {
+                Template = this,
+                Tag = tag,
+                Alias = alias,
+            };
         }
     }
+
+    public IEnumerable<WordTemplateFieldInfo> EnumerateFieldsUnprocessed() => EnumerateFields().Where(f => !_Fields.ContainsKey(f.Tag));
+    public IEnumerable<WordTemplateFieldInfo> EnumerateFieldsProcessed() => EnumerateFields().Where(f => _Fields.ContainsKey(f.Tag));
+
 
     public FileInfo SaveTo(string FilePath) => SaveTo(new FileInfo(FilePath));
 
@@ -75,18 +76,14 @@ public class WordTemplate
         {
             File.Delete();
 
-            _TemplateFile.CopyTo(File.FullName);
-
-            using var document = WordprocessingDocument.Open(File.FullName, true);
+            using var document = WordprocessingDocument.Open(_TemplateFile.FullName, true, new() { AutoSave = false });
             var word_main_document_part = document.MainDocumentPart ?? throw new InvalidOperationException("Отсутствует основная часть документа");
 
             var document_body_fields = word_main_document_part.Document.GetFields();
-            var headers_fields = document.MainDocumentPart.HeaderParts.SelectMany(static h => h.Header.GetFields());
-            var footers_fields = document.MainDocumentPart.FooterParts.SelectMany(static f => f.Footer.GetFields());
+            var parts_fields = word_main_document_part.Parts.SelectMany(p => p.OpenXmlPart.RootElement.GetFields());
 
             var document_fields = document_body_fields
-               .Concat(headers_fields)
-               .Concat(footers_fields)
+               .Concat(parts_fields)
                .Select(f => (Tag: f.GetTag(), Field: f))
                .Where(f => f.Tag is { Length: > 0 })
                .GroupBy(f => f.Tag, f => f.Field);
@@ -100,7 +97,8 @@ public class WordTemplate
 
             unprocessed?.ForEach(static e => e.Remove());
 
-            File.Refresh();
+            var clone_doc = document.Clone(File.FullName, false, new() { AutoSave = false });
+
             return File;
         }
         catch
@@ -108,35 +106,80 @@ public class WordTemplate
             File.Delete();
             throw;
         }
+        finally
+        {
+            File.Refresh();
+        }
     }
 
-    public WordTemplate Field(string FieldName, string FieldValue)
+    public void SaveTo(Stream steram)
     {
-        _Fields[FieldName] = new TemplateFieldValue(FieldName, FieldValue);
+        using var document = WordprocessingDocument.Open(_TemplateFile.FullName, true, new() { AutoSave = false });
+        var word_main_document_part = document.MainDocumentPart ?? throw new InvalidOperationException("Отсутствует основная часть документа");
+
+        var document_body_fields = word_main_document_part.Document.GetFields();
+        var parts_fields = word_main_document_part.Parts.SelectMany(p => p.OpenXmlPart.RootElement.GetFields());
+
+        var document_fields = document_body_fields
+           .Concat(parts_fields)
+           .Select(f => (Tag: f.GetTag(), Field: f))
+           .Where(f => f.Tag is { Length: > 0 })
+           .GroupBy(f => f.Tag, f => f.Field);
+
+        var unprocessed = _RemoveUnprocessedFields ? new List<SdtElement>() : null;
+        foreach (var (tag, fields) in document_fields)
+            if (_Fields.TryGetValue(tag!, out var template))
+                template.Process(fields, _ReplaceFieldsWithValues);
+            else
+                unprocessed?.AddRange(fields);
+
+        unprocessed?.ForEach(static e => e.Remove());
+
+        document.Clone(steram, false, new() { AutoSave = false });
+    }
+
+    public WordTemplate Field(string FieldName, string? FieldValue)
+    {
+        if (FieldValue is null)
+            _Fields.Remove(FieldName);
+        else
+            _Fields[FieldName] = new TemplateFieldValue(FieldName, FieldValue);
         return this;
     }
 
-    public WordTemplate Field(string FieldName, Func<string> FieldValue)
+    public WordTemplate Field(string FieldName, Func<string>? FieldValue)
     {
-        _Fields[FieldName] = new TemplateFieldValue(FieldName, FieldValue);
+        if (FieldValue is null)
+            _Fields.Remove(FieldName);
+        else
+            _Fields[FieldName] = new TemplateFieldValue(FieldName, FieldValue);
         return this;
     }
 
-    public WordTemplate Field(string FieldName, object FieldValue)
+    public WordTemplate Field(string FieldName, object? FieldValue)
     {
-        _Fields[FieldName] = new TemplateFieldValue(FieldName, FieldValue);
+        if (FieldValue is null)
+            _Fields.Remove(FieldName);
+        else
+            _Fields[FieldName] = new TemplateFieldValue(FieldName, FieldValue);
         return this;
     }
 
-    public WordTemplate Field<T>(string FieldName, T FieldValue)
+    public WordTemplate Field<T>(string FieldName, T? FieldValue)
     {
-        _Fields[FieldName] = new TemplateFieldValue<T>(FieldName, FieldValue);
+        if (FieldValue is null)
+            _Fields.Remove(FieldName);
+        else
+            _Fields[FieldName] = new TemplateFieldValue<T>(FieldName, FieldValue);
         return this;
     }
 
-    public WordTemplate Field<T>(string FieldName, IReadOnlyCollection<T> Values, Action<IFieldValueSetter, T> Setter)
+    public WordTemplate Field<T>(string FieldName, IReadOnlyCollection<T>? Values, Action<IFieldValueSetter, T>? Setter)
     {
-        _Fields[FieldName] = TemplateFieldBlockValue.Create(FieldName, Values, Setter);
+        if (Values is not { Count: > 0 } || Setter is null)
+            _Fields.Remove(FieldName);
+        else
+            _Fields[FieldName] = TemplateFieldBlockValue.Create(FieldName, Values, Setter);
         return this;
     }
 }

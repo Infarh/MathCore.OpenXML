@@ -1,12 +1,7 @@
-﻿using System;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Text;
 
-using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
-
-using MathCore.OpenXML.WordProcessing.Extensions.Word;
 
 namespace MathCore.OpenXML.ExcelProcessing.Extensions;
 

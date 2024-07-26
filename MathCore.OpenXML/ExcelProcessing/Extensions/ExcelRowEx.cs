@@ -1,6 +1,4 @@
-﻿using System;
-
-using DocumentFormat.OpenXml.Spreadsheet;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace MathCore.OpenXML.ExcelProcessing.Extensions;
 

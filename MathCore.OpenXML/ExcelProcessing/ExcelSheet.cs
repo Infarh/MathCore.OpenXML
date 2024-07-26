@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
 
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
@@ -36,7 +33,7 @@ public class ExcelSheet : IEnumerable<ExcelRow>
 
         var sheet_info = workbook.Workbook.Sheets
            .Cast<Sheet>()
-           .First(s => s.Name.Value == _SheetName);
+           .First(s => s.Name?.Value == _SheetName);
 
         var sheet = workbook.GetPartById(sheet_info.Id);
         var reader = new OpenXmlPartReader(sheet);

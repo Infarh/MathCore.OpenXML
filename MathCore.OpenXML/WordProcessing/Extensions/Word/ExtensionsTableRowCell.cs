@@ -5,8 +5,17 @@ namespace MathCore.OpenXML.WordProcessing.Extensions.Word;
 
 public static class ExtensionsTableRowCell
 {
-    public static void Add(this TableCell cell, Paragraph paragraph) => cell.AppendChild(paragraph);
-    public static void Add(this TableCell cell, string text) => cell.Add(new Paragraph { text });
+    public static void Add(this TableCell cell, Paragraph paragraph)
+    {
+        cell.RemoveAllChildren<Paragraph>();
+        cell.AppendChild(paragraph);
+    }
+
+    public static void Add(this TableCell cell, string text)
+    {
+        var paragraph = new Paragraph { text };
+        cell.Add(paragraph);
+    }
 
     public static TableCell Width(this TableCell Cell, int width, TableWidthUnitValues? Type = null)
     {

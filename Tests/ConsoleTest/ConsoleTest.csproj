@@ -26,8 +26,15 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup><!--<Using Include="ConsoleTest.Infrastructure" />-->
+  
+    <None Update="WordTemplate.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <ItemGroup>
-    <!--<Using Include="ConsoleTest.Infrastructure" />-->
+    <Using Include="ConsoleTest.Infrastructure" />
   </ItemGroup>
 
 </Project>

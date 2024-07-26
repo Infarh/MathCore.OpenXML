@@ -1,34 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using DocumentFormat.OpenXml;
+﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace MathCore.OpenXML.WordProcessing.Extensions.Word;
 
 public static class ExtensionsSdt
 {
-    public static IEnumerable<SdtElement> GetFields(this OpenXmlElement Root)
+    public static IEnumerable<SdtElement> GetFields(this OpenXmlElement? Root)
     {
-        if (Root is SdtElement root_sdt)
+        switch (Root)
         {
-            yield return root_sdt;
-            yield break;
+            case null:
+                yield break;
+
+            case SdtElement root_sdt:
+                yield return root_sdt;
+                yield break;
         }
 
-        var queue = new Stack<OpenXmlElement>(Root.ChildElements);
-
-        while (queue.Count > 0)
-        {
-            var element = queue.Pop();
-
+        var stack = new Stack<OpenXmlElement>(Root.ChildElements);
+        
+        foreach(var element in stack.EnumerateWhileNotEmpty())
             if (element is SdtElement field)
                 yield return field;
             else
                 foreach (var child_element in element.ChildElements)
-                    queue.Push(child_element);
-        }
+                    stack.Push(child_element);
     }
 
     public static Run ReplaceToRun(this SdtRun Run, string? Content = null)
@@ -51,23 +47,23 @@ public static class ExtensionsSdt
             ?? throw new InvalidOperationException("Не найден узел с параметрами");
 
         var tag = properties.Elements<Tag>().FirstOrDefault();
-        return tag?.Val;
+        return tag?.Val?.Value;
     }
 
     public static string? GetAlias(this SdtElement run)
     {
         var properties = run.GetFirstChild<SdtProperties>()!;
-        var aliace = properties.GetFirstChild<SdtAlias>()!.Val;
+        var aliace = properties.GetFirstChild<SdtAlias>()!.Val?.Value;
         return aliace;
     }
 
-    public static Run GetRun(this SdtRun Run)
+    public static Run? GetRun(this SdtRun Run)
     {
-        var run = Run.SdtContentRun!.GetFirstChild<Run>()!;
+        var run = Run.SdtContentRun!.GetFirstChild<Run>();
         return run;
     }
 
-    public static string GetText(this SdtRun Run) => Run.GetRun().InnerText;
+    public static string? GetText(this SdtRun Run) => Run.GetRun()?.InnerText;
 
     public static Paragraph ReplaceToParagraph(this SdtBlock Block, string? Content = null)
     {

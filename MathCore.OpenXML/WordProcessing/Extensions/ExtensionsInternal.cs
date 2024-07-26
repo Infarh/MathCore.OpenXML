@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-using DocumentFormat.OpenXml;
+﻿using DocumentFormat.OpenXml;
 // ReSharper disable CheckNamespace
 
 namespace MathCore.OpenXML.WordProcessing;

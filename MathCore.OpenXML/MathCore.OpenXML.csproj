@@ -4,10 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <ExplicitUsing>Enabled</ExplicitUsing>
-    <Version>0.0.5.5</Version>
+    <Version>0.0.6</Version>
     <PackageReleaseNotes>
-      Механизм формирования Excel-документа
-      Добавлена возможность перечисления всех полей документа
+      Изменён механизм заполнения полей шаблона Word
     </PackageReleaseNotes>
   </PropertyGroup>
 
@@ -22,10 +21,15 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>OpenXML;Excel;Word;xlsx;docx</PackageTags>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="MathCore.OpenXML.Infrastructure.Extensions" />
   </ItemGroup>
 
 </Project>

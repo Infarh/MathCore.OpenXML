@@ -6,7 +6,11 @@ namespace MathCore.OpenXML.WordProcessing.Extensions.Word;
 public static class ExtensionsTableRow
 {
     public static void Add(this TableRow Row, TableCell cell) => Row.AppendChild(cell);
-    public static void Add(this TableRow Row, string text) => Row.Add(new TableCell { text });
+    public static void Add(this TableRow Row, string text)
+    {
+        var cell = new TableCell { text };
+        Row.Add(cell);
+    }
 
     public static TableRow Height(this TableRow Row, int Height)
     {

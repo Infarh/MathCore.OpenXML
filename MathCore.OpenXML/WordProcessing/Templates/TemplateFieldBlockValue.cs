@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using DocumentFormat.OpenXml;
+﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 
 using MathCore.OpenXML.WordProcessing.Extensions.Word;
@@ -19,7 +15,7 @@ public abstract class TemplateFieldBlockValue : TemplateField
     protected TemplateFieldBlockValue(string Tag) : base(Tag) { }
 }
 
-public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
+public class TemplateFieldBlockValue<T>(string Tag, IEnumerable<T> Values, Action<IFieldValueSetter, T> Setter) : TemplateFieldBlockValue(Tag)
 {
     private class FieldValueSetter : IFieldValueSetter
     {
@@ -125,15 +121,8 @@ public class TemplateFieldBlockValue<T> : TemplateFieldBlockValue
         }
     }
 
-    private readonly IEnumerable<T> _Values;
-    private readonly FieldValueSetter _ValueSetter;
-
-    public TemplateFieldBlockValue(string Tag, IEnumerable<T> Values, Action<IFieldValueSetter, T> Setter)
-        : base(Tag)
-    {
-        _Values = Values;
-        _ValueSetter = new(Setter);
-    }
+    private readonly IEnumerable<T> _Values = Values;
+    private readonly FieldValueSetter _ValueSetter = new(Setter);
 
     public override void Process(IEnumerable<SdtElement> Fields, bool ReplaceFieldsWithValues)
     {

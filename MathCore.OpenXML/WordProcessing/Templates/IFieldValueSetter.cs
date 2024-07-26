@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace MathCore.OpenXML.WordProcessing.Templates;
+﻿namespace MathCore.OpenXML.WordProcessing.Templates;
 
 public interface IFieldValueSetter
 {
