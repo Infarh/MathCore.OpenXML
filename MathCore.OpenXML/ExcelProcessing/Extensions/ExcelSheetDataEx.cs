@@ -6,13 +6,7 @@ public static class ExcelSheetDataEx
 {
     public static SheetData Add(this SheetData data, Row row)
     {
-        Row? last_row = null;
-        for (var i = data.ChildElements.Count - 1; i >= 0; i--)
-        {
-            if (data.ChildElements[i] is not Row child_row) continue;
-            last_row = child_row;
-            break;
-        }
+        var last_row = data.EnumChildReverse<Row>().FirstOrDefault();
 
         row.RowIndex = last_row is { RowIndex.Value: var last_row_index } ? last_row_index + 1 : 1U;
 

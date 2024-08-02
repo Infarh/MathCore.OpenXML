@@ -9,14 +9,14 @@ public static class ExcelCellEx
 {
     public static InlineString InlineText(this Cell cell, string text)
     {
-        if (cell.ChildElements.OfType<InlineString>().FirstOrDefault() is not { } inline_string)
+        if (cell.EnumChild<InlineString>().FirstOrDefault() is not { } inline_string)
         {
             inline_string = new();
             cell.Append(inline_string);
             cell.DataType = CellValues.InlineString;
         }
 
-        if (inline_string.ChildElements.OfType<Text>().FirstOrDefault() is { } text_item)
+        if (inline_string.EnumChild<Text>().FirstOrDefault() is { } text_item)
             text_item.Text = text;
         else
             inline_string.Append(new Text(text));
@@ -79,8 +79,9 @@ public static class ExcelCellEx
     public static int GetCellRowIndex(string CellReference)
     {
         var index = 0;
-        foreach (var c in CellReference)
+        for (var i = 0; i < CellReference.Length; i++)
         {
+            var c = CellReference[i];
             if (!char.IsLetter(c))
                 break;
 

@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <ExplicitUsing>Enabled</ExplicitUsing>
-    <Version>0.0.6.2</Version>
+    <Version>0.0.6.3</Version>
     <PackageReleaseNotes>
       Изменён механизм заполнения полей шаблона Word
       Откат изменений в механизме редактирования шаблона. Перед началом редактирования вновь сперва создаётся копия файла.
@@ -26,7 +26,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.*" />
+    <!--<PackageReference Include="DocumentFormat.OpenXml" Version="3.1.0" />-->
+    <PackageReference Include="DocumentFormat.OpenXml" Version="[2.20.0,)" />
   </ItemGroup>
 
   <ItemGroup>

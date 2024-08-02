@@ -69,7 +69,7 @@ public static class ExcelSpreadsheetDocumentEx
         sheet_part.Worksheet = new(sheet_data);
 
         var sheets = workbook_part.Workbook.Sheets ?? workbook_part.Workbook.AppendChild(new Sheets());
-        var sheet_id = sheets.ChildElements.OfType<Sheet>().Select(s => s.SheetId ?? 0).DefaultIfEmpty().Max() + 1;
+        var sheet_id = sheets.EnumChild<Sheet>().Select(s => s.SheetId ?? 0).DefaultIfEmpty().Max() + 1;
         sheets.AppendChild(new Sheet
         {
             Id = workbook_part.GetIdOfPart(sheet_part),
@@ -89,47 +89,5 @@ public static class ExcelSpreadsheetDocumentEx
         }
 
         return new(shared_string_table_part);
-    }
-}
-
-public class SharedStringTableProvider(SharedStringTablePart SharedStringTablePart)
-{
-    private Dictionary<string, int> _Index = [];
-
-    private int _MaxIndex = 0;
-
-    public int this[string str]
-    {
-        get
-        {
-            if (_Index.TryGetValue(str, out var index))
-                return index;
-
-            if (_MaxIndex != SharedStringTablePart.SharedStringTable.ChildElements.Count)
-            {
-                Refresh();
-                return this[str];
-            }
-
-            SharedStringTablePart.SharedStringTable.Append(new SharedStringItem(new Text(str)));
-            SharedStringTablePart.SharedStringTable.Save();
-            index = SharedStringTablePart.SharedStringTable.ChildElements.Count - 1;
-
-            _Index[str] = index;
-
-            _MaxIndex = index + 1;
-            return index;
-        }
-    }
-
-    public void Refresh()
-    {
-        var index = new Dictionary<string, int>(SharedStringTablePart.SharedStringTable.ChildElements.Count);
-        var i = 1;
-        foreach (SharedStringItem item in SharedStringTablePart.SharedStringTable.ChildElements)
-            index[item.InnerText] = i++;
-
-        _Index = index;
-        _MaxIndex = SharedStringTablePart.SharedStringTable.ChildElements.Count;
     }
 }

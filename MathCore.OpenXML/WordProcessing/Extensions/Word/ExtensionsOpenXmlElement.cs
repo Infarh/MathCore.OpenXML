@@ -6,7 +6,7 @@ public static class ExtensionsOpenXmlElement
 {
     public static IEnumerable<OpenXmlElement> DescendantChilds(this OpenXmlElement Element)
     {
-        var queue = new Queue<OpenXmlElement>(Element.ChildElements);
+        var queue = new Queue<OpenXmlElement>(Element.EnumChild());
         return queue.EnumQueueItems();
     }
 
@@ -31,7 +31,7 @@ public static class ExtensionsOpenXmlElement
         while (queue.Count > 0)
         {
             var element = queue.Dequeue();
-            foreach (var child_element in element.ChildElements)
+            foreach (var child_element in element.EnumChild())
                 queue.Enqueue(child_element);
 
             yield return element;
