@@ -17,14 +17,23 @@ public static class ExtensionsSdt
                 yield break;
         }
 
-        var stack = new Stack<OpenXmlElement>(Root.ChildElements);
-        
-        foreach(var element in stack.EnumerateWhileNotEmpty())
+        var stack = new Stack<OpenXmlElement>(Root.EnumChild());
+
+        foreach (var element in stack.EnumerateWhileNotEmpty())
             if (element is SdtElement field)
                 yield return field;
             else
-                foreach (var child_element in element.ChildElements)
+                foreach (var child_element in element.EnumChild())
                     stack.Push(child_element);
+    }
+
+    private static IEnumerable<OpenXmlElement> EnumChild(this OpenXmlElement element)
+    {
+        if(!element.HasChildren)
+            yield break;
+
+        for (var child = element.FirstChild; child != null; child = child.NextSibling())
+            yield return child;
     }
 
     public static Run ReplaceToRun(this SdtRun Run, string? Content = null)
@@ -53,8 +62,8 @@ public static class ExtensionsSdt
     public static string? GetAlias(this SdtElement run)
     {
         var properties = run.GetFirstChild<SdtProperties>()!;
-        var aliace = properties.GetFirstChild<SdtAlias>()?.Val?.Value?.Trim();
-        return aliace;
+        var alias = properties.GetFirstChild<SdtAlias>()?.Val?.Value?.Trim();
+        return alias;
     }
 
     public static Run? GetRun(this SdtRun Run)
