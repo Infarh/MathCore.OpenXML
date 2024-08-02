@@ -27,15 +27,6 @@ public static class ExtensionsSdt
                     stack.Push(child_element);
     }
 
-    private static IEnumerable<OpenXmlElement> EnumChild(this OpenXmlElement element)
-    {
-        if(!element.HasChildren)
-            yield break;
-
-        for (var child = element.FirstChild; child != null; child = child.NextSibling())
-            yield return child;
-    }
-
     public static Run ReplaceToRun(this SdtRun Run, string? Content = null)
     {
         var run = Run.SdtContentRun!.GetFirstChild<Run>()!;
@@ -119,7 +110,7 @@ public static class ExtensionsSdt
     public static void SetContentValue(this SdtElement Element, string Content)
     {
         var first = true;
-        foreach (var run in Element.GetContent().OfType<Run>().ToArray())
+        foreach (var run in Element.Descendants<Run>().ToArray())
             if (first)
             {
                 first = false;
@@ -142,7 +133,7 @@ public static class ExtensionsSdt
     {
         var first_content_element = Element.Descendants().First(e => e.Parent!.LocalName == "sdtContent" && e is not SdtElement);
         var content_container = first_content_element.Parent;
-        return content_container!.ChildElements;
+        return content_container!.EnumChild();
     }
 
     public static void Deconstruct(this SdtElement element, out string? Tag, out string? Alias, out IEnumerable<OpenXmlElement> Content)
@@ -154,7 +145,7 @@ public static class ExtensionsSdt
 
     public static OpenXmlElement ReplaceWithContent(this SdtElement element)
     {
-        var sdt_content = element.ChildElements.First(e => e.LocalName.StartsWith("sdt") && !e.LocalName.EndsWith("Pr"));
+        var sdt_content = element.EnumChild().First(e => e.LocalName.StartsWith("sdt") && !e.LocalName.EndsWith("Pr"));
         var content = sdt_content.FirstChild ?? throw new InvalidOperationException("Не найдено содержимое шаблонного элемента");
         content.Remove();
 

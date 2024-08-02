@@ -20,7 +20,7 @@ public struct WordTemplateFieldInfo(string? text)
         }
     }
 
-    public override readonly string ToString() => $"{Tag}:{Alias}".TrimEnd(':');
+    public readonly override string ToString() => $"{Tag}:{Alias}".TrimEnd(':');
 
     public readonly void Deconstruct(out string tag, out string? alias) => (tag, alias) = (Tag, Alias);
 

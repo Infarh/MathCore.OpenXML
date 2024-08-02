@@ -20,7 +20,7 @@ public class TemplateFieldBlockValue<T>(string Tag, IEnumerable<T> Values, Actio
     private class FieldValueSetter : IFieldValueSetter
     {
         private readonly Action<IFieldValueSetter, T> _Setter;
-        private IReadOnlyList<OpenXmlElement>? _CurrentElements = null!;
+        private IReadOnlyList<OpenXmlElement>? _CurrentElements;
         private ILookup<string?, SdtElement> _Fields = null!;
         private bool _ReplaceFieldsWithValues;
 
@@ -45,7 +45,7 @@ public class TemplateFieldBlockValue<T>(string Tag, IEnumerable<T> Values, Actio
 
         public FieldValueSetter(Action<IFieldValueSetter, T> Setter) => _Setter = Setter;
 
-        private void SetField(string FieldName, string Value)
+        private void SetField(string FieldName, string? Value)
         {
             if (Value is null) return;
 
@@ -208,9 +208,9 @@ public class TemplateFieldBlockValue<T>(string Tag, IEnumerable<T> Values, Actio
     private void ProcessBlock(SdtBlock BlockField, bool ReplaceFieldsWithValues)
     {
         var block_content_0 = BlockField.SdtContentBlock?.FirstChild as SdtBlock ?? throw new InvalidOperationException("Содержимое шаблонного блока не найдено");
-        var template_elements = block_content_0.SdtContentBlock?.ChildElements ?? throw new InvalidOperationException("Дочерние элементы шаблонного блока не определены.");
+        var template_elements = block_content_0.SdtContentBlock?.EnumChild() ?? throw new InvalidOperationException("Дочерние элементы шаблонного блока не определены.");
 
-        var elements = new List<OpenXmlElement>(template_elements.Count);
+        var elements = new List<OpenXmlElement>(template_elements.Count());
         var any = false;
         foreach (var value in _Values)
         {

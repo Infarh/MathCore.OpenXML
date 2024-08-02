@@ -77,10 +77,15 @@ public class WordTemplate
             _TemplateFile.CopyTo(File.FullName, true);
 
             using var document = WordprocessingDocument.Open(File.FullName, true, new() { AutoSave = false });
-            var word_main_document_part = document.MainDocumentPart ?? throw new InvalidOperationException("Отсутствует основная часть документа");
+            var word_main_document_part = document.MainDocumentPart
+                ?? throw new InvalidOperationException("Отсутствует основная часть документа");
 
             var document_body_fields = word_main_document_part.Document.GetFields();
-            var parts_fields = word_main_document_part.Parts.SelectMany(p => p.OpenXmlPart.RootElement.GetFields());
+
+            var parts_fields = word_main_document_part
+                .GetPartsOfType<OpenXmlPart>()
+                .Where(p => p is IFixedContentTypePart)
+                .SelectMany(p => p.RootElement.GetFields());
 
             var document_fields = document_body_fields
                .Concat(parts_fields)
@@ -90,10 +95,12 @@ public class WordTemplate
 
             var unprocessed = _RemoveUnprocessedFields ? new List<SdtElement>() : null;
             foreach (var (tag, fields) in document_fields)
+            {
                 if (_Fields.TryGetValue(tag!, out var template))
                     template.Process(fields, _ReplaceFieldsWithValues);
                 else
                     unprocessed?.AddRange(fields);
+            }
 
             unprocessed?.ForEach(static e => e.Remove());
 
@@ -149,6 +156,15 @@ public class WordTemplate
             _Fields.Remove(FieldName);
         else
             _Fields[FieldName] = new TemplateFieldValue<T>(FieldName, FieldValue);
+        return this;
+    }
+
+    public WordTemplate Field<T>(string FieldName, IEnumerable<T>? Values, Action<IFieldValueSetter, T>? Setter)
+    {
+        if (Values is null || Setter is null)
+            _Fields.Remove(FieldName);
+        else
+            _Fields[FieldName] = TemplateFieldBlockValue.Create(FieldName, Values, Setter);
         return this;
     }
 

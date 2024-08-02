@@ -10,7 +10,7 @@ internal static class ExtensionsInternal
         if (!root.HasChildren)
             yield break;
 
-        var stack = new Stack<OpenXmlElement>(root.ChildElements);
+        var stack = new Stack<OpenXmlElement>(root.EnumChild());
 
         while (stack.Count > 0)
         {
@@ -21,7 +21,7 @@ internal static class ExtensionsInternal
 
             if (!element.HasChildren || !ChildSelector(element)) continue;
 
-            foreach (var child in element.ChildElements)
+            foreach (var child in element.EnumChild())
                 stack.Push(child);
         }
     }
