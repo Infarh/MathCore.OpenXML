@@ -5,21 +5,18 @@ using MathCore.OpenXML.WordProcessing.Extensions.Word;
 
 namespace MathCore.OpenXML.WordProcessing.Templates;
 
-public abstract class TemplateFieldBlockValue : TemplateField
+public abstract class TemplateFieldBlockValue(string Tag) : TemplateField(Tag)
 {
     public static TemplateFieldBlockValue<T> Create<T>(
         string TagName, IEnumerable<T> Values,
         Action<IFieldValueSetter, T> Setter) =>
         new(TagName, Values, Setter);
-
-    protected TemplateFieldBlockValue(string Tag) : base(Tag) { }
 }
 
 public class TemplateFieldBlockValue<T>(string Tag, IEnumerable<T> Values, Action<IFieldValueSetter, T> Setter) : TemplateFieldBlockValue(Tag)
 {
-    private class FieldValueSetter : IFieldValueSetter
+    private class FieldValueSetter(Action<IFieldValueSetter, T> Setter) : IFieldValueSetter
     {
-        private readonly Action<IFieldValueSetter, T> _Setter;
         private IReadOnlyList<OpenXmlElement>? _CurrentElements;
         private ILookup<string?, SdtElement> _Fields = null!;
         private bool _ReplaceFieldsWithValues;
@@ -43,8 +40,6 @@ public class TemplateFieldBlockValue<T>(string Tag, IEnumerable<T> Values, Actio
             }
         }
 
-        public FieldValueSetter(Action<IFieldValueSetter, T> Setter) => _Setter = Setter;
-
         private void SetField(string FieldName, string? Value)
         {
             if (Value is null) return;
@@ -59,7 +54,7 @@ public class TemplateFieldBlockValue<T>(string Tag, IEnumerable<T> Values, Actio
                     field.SetContentValue(Value);
         }
 
-        public IFieldValueSetter Field(string FieldName, string Value)
+        public IFieldValueSetter Field(string FieldName, string? Value)
         {
             SetField(FieldName, Value);
             return this;
@@ -67,8 +62,8 @@ public class TemplateFieldBlockValue<T>(string Tag, IEnumerable<T> Values, Actio
 
         public IFieldValueSetter Field(string FieldName, Func<string> Value) => Field(FieldName, Value());
 
-        public IFieldValueSetter Field(string FieldName, object Value) => Field(FieldName, Value.ToString());
-        public IFieldValueSetter Field<TValue>(string FieldName, TValue Value) => Value is null ? this : Field(FieldName, Value.ToString());
+        public IFieldValueSetter Field(string FieldName, object? Value) => Field(FieldName, Value?.ToString());
+        public IFieldValueSetter Field<TValue>(string FieldName, TValue? Value) => Value is null ? this : Field(FieldName, Value.ToString());
 
         public void Value(string Value)
         {
@@ -117,7 +112,7 @@ public class TemplateFieldBlockValue<T>(string Tag, IEnumerable<T> Values, Actio
                .Where(e => e.Tag is { Length: > 0 })
                .ToLookup(e => e.Tag, e => e.Element);
 
-            _Setter(this, Value);
+            Setter(this, Value);
         }
     }
 

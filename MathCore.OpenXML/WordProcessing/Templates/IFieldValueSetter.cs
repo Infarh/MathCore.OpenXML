@@ -4,10 +4,10 @@ public interface IFieldValueSetter
 {
     object this[string FieldName] { set; }
 
-    IFieldValueSetter Field(string FieldName, string Value);
+    IFieldValueSetter Field(string FieldName, string? Value);
     IFieldValueSetter Field(string FieldName, Func<string> Value);
-    IFieldValueSetter Field(string FieldName, object Value);
-    IFieldValueSetter Field<T>(string FieldName, T Value);
+    IFieldValueSetter Field(string FieldName, object? Value);
+    IFieldValueSetter Field<T>(string FieldName, T? Value);
 
     void Value(string Value);
     void Value(Func<string> Value);
