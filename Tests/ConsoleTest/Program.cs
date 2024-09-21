@@ -3,11 +3,20 @@
 using MathCore.OpenXML.WordProcessing;
 
 using System.Globalization;
+using System.Text.RegularExpressions;
+
+//var lines = new List<string>();
+//var regex = GetSpaceSelectionRegex();
+//foreach (var line in Word.File("Document.docx").Select(l => l.Trim()).Select(l => regex.Replace(l, " ")).Where(l => l.Length > 0))
+//{
+//    lines.Add(line);
+//}
+
 
 var template_file = new FileInfo("Document.docx").ThrowIfNotFound();
 var document_file = new FileInfo("doc.docx").EnsureDeleted();
 
-var products = Product.Test(rnd: new Random()).ToArray();
+var products = Product.Test(rnd: new()).ToArray();
 
 products[0] = products[0] with { Features = [] };
 
@@ -47,3 +56,9 @@ document_file.Execute();
 
 Console.WriteLine("End.");
 return;
+
+partial class Program
+{
+    [GeneratedRegex(@"\s{2,}", RegexOptions.Compiled)]
+    private static partial Regex GetSpaceSelectionRegex();
+}
