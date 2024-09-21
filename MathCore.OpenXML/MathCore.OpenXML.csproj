@@ -4,10 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <ExplicitUsing>Enabled</ExplicitUsing>
-    <Version>0.0.6.3</Version>
+    <Version>0.0.7</Version>
     <PackageReleaseNotes>
-      Изменён механизм заполнения полей шаблона Word
-      Откат изменений в механизме редактирования шаблона. Перед началом редактирования вновь сперва создаётся копия файла.
+      Добавлен механизм чтения текста из Word-файла по абзацам
     </PackageReleaseNotes>
   </PropertyGroup>
 
