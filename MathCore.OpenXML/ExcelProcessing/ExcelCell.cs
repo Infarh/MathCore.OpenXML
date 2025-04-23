@@ -35,7 +35,7 @@ public readonly struct ExcelCell
             var col_index = 0;
             for (var i = 0; i < chars_count; i++)
             {
-                col_index *= 10;
+                col_index *= 26;
                 col_index += CharToNumber(_Index[i]);
             }
 
