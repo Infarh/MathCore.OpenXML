@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/ConsoleTest/ConsoleTest.csproj" />
+    <Project Path="Tests/MathCore.OpenXML.Tests/MathCore.OpenXML.Tests.csproj" />
+  </Folder>
+  <Project Path="MathCore.OpenXML/MathCore.OpenXML.csproj" />
+</Solution>
