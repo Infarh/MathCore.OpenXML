@@ -80,7 +80,7 @@ public class TemplateFieldBlockValue<T>(string Tag, IEnumerable<T> Values, Actio
 
         public void Value(Func<string> Value) => this.Value(Value());
 
-        public void Value(object Value) => this.Value(Value.ToString());
+        public void Value(object Value) => this.Value(Value.ToString() ?? string.Empty);
 
         public IFieldValueSetter Field<TValue>(
             string FieldName,

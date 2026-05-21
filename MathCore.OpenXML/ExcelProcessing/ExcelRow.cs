@@ -143,7 +143,9 @@ public readonly struct ExcelRow : IEnumerable<ExcelCell>, IEnumerable<string?>
         if (_Reader.ElementType != typeof(Row) || !_Reader.IsStartElement)
             throw new InvalidOperationException("Некорректное состояние объекта чтения потока данных. Текущий элемент не является строкой.");
 
-        var index = int.Parse(_Reader.Attributes.Value("r"));
+        var index_attribute = _Reader.Attributes.Value("r");
+        if (!int.TryParse(index_attribute, out var index))
+            throw new InvalidOperationException("Не удалось прочитать индекс строки.");
         if (_Index != index)
             throw new InvalidOperationException("Попытка повторного перечисления ячеек строки невозможно");
 

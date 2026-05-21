@@ -12,7 +12,7 @@ public class TemplateFieldValue : TemplateField
     {
         string str => str,
         Func<string> f => f(),
-        _ => _Value.ToString()
+        _ => _Value.ToString() ?? string.Empty
     };
 
     public TemplateFieldValue(string Tag, object Value) : base(Tag) => _Value = Value;

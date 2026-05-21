@@ -34,7 +34,7 @@ public class Excel : IEnumerable<ExcelSheet>
             var workbook = document.WorkbookPart ?? throw new InvalidOperationException("В документе отсутствует главная часть");
 
             foreach (Sheet sheet in workbook.Workbook.Sheets ?? throw new InvalidOperationException("В главной части отсутствует часть с листами"))
-                yield return sheet.Name ?? throw new InvalidOperationException("Отсутствует имя листа");
+                yield return sheet.Name?.Value ?? throw new InvalidOperationException("Отсутствует имя листа");
         }
     }
 
@@ -44,24 +44,26 @@ public class Excel : IEnumerable<ExcelSheet>
         get
         {
             using var document = SpreadsheetDocument.Open(FileName, false);
-            var workbook = document.WorkbookPart;
-            return workbook.Workbook.Sheets.Count();
+            var workbook = document.WorkbookPart ?? throw new InvalidOperationException("В документе отсутствует главная часть");
+            var sheets = workbook.Workbook.Sheets ?? throw new InvalidOperationException("В главной части отсутствует часть с листами");
+            return sheets.Count();
         }
     }
 
     /// <summary>Получить лист по его имени</summary>
     /// <param name="SheetName">Имя листа</param>
     /// <returns>Лист с указанным именем, либо null если лист не найден</returns>
-    public ExcelSheet this[string SheetName]
+    public ExcelSheet? this[string SheetName]
     {
         get
         {
             using var document = SpreadsheetDocument.Open(FileName, false);
-            var workbook = document.WorkbookPart;
+            var workbook = document.WorkbookPart ?? throw new InvalidOperationException("В документе отсутствует главная часть");
+            var sheets = workbook.Workbook.Sheets ?? throw new InvalidOperationException("В главной части отсутствует часть с листами");
 
-            var sheet = workbook.Workbook.Sheets
+            var sheet = sheets
                .OfType<Sheet>()
-               .FirstOrDefault(s => s.Name.Value == SheetName);
+               .FirstOrDefault(s => string.Equals(s.Name?.Value, SheetName, StringComparison.Ordinal));
 
             return sheet is null ? null : new ExcelSheet(this, sheet);
         }
@@ -75,9 +77,10 @@ public class Excel : IEnumerable<ExcelSheet>
     public IEnumerator<ExcelSheet> GetEnumerator()
     {
         using var document = SpreadsheetDocument.Open(FileName, false);
-        var workbook = document.WorkbookPart;
+        var workbook = document.WorkbookPart ?? throw new InvalidOperationException("В документе отсутствует главная часть");
+        var sheets = workbook.Workbook.Sheets ?? throw new InvalidOperationException("В главной части отсутствует часть с листами");
 
-        foreach (var sheet in workbook.Workbook.Sheets.Cast<Sheet>())
+        foreach (var sheet in sheets.Cast<Sheet>())
             yield return new ExcelSheet(this, sheet);
     }
 }

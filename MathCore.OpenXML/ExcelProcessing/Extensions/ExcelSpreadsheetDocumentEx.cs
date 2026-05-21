@@ -69,7 +69,7 @@ public static class ExcelSpreadsheetDocumentEx
         sheet_part.Worksheet = new(sheet_data);
 
         var sheets = workbook_part.Workbook.Sheets ?? workbook_part.Workbook.AppendChild(new Sheets());
-        var sheet_id = sheets.EnumChild<Sheet>().Select(s => s.SheetId ?? 0).DefaultIfEmpty().Max() + 1;
+        var sheet_id = sheets.EnumChild<Sheet>().Select(s => s.SheetId?.Value ?? 0u).DefaultIfEmpty().Max() + 1u;
         sheets.AppendChild(new Sheet
         {
             Id = workbook_part.GetIdOfPart(sheet_part),

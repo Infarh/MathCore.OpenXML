@@ -54,7 +54,8 @@ public readonly struct ExcelCell
     /// <summary>Строковое значение ячейки</summary>
     public string Value => _Type switch
     {
-        "s" => _SharedStrings[int.Parse(_Value)],
+        "s" when int.TryParse(_Value, out var index) && index >= 0 && index < _SharedStrings.Length => _SharedStrings[index],
+        "s" => _Value,
         "str" => _Value,
         _ => _Value
     };
@@ -66,23 +67,26 @@ public readonly struct ExcelCell
     /// <param name="t">Атрибут типа ячейки</param>
     private static void ReadCellAttributes(IEnumerable<OpenXmlAttribute> Attributes, out string r, out int s, out string t)
     {
-        r = default;
+        r = string.Empty;
         s = default;
-        t = default;
+        t = string.Empty;
 
         foreach (var attribute in Attributes)
             switch (attribute.LocalName)
             {
                 case "r":
-                    r = attribute.Value;
+                    r = attribute.Value ?? string.Empty;
                     break;
                 case "s":
-                    s = int.Parse(attribute.Value);
+                    _ = int.TryParse(attribute.Value, out s);
                     break;
                 case "t":
-                    t = attribute.Value;
+                    t = attribute.Value ?? string.Empty;
                     break;
             }
+
+        if (string.IsNullOrWhiteSpace(r))
+            throw new FormatException("Не задан индекс ячейки");
     }
 
     /// <summary>Инициализация новой структуры ячейки таблицы на основе объекта чтения данных таблицы</summary>
@@ -96,8 +100,8 @@ public readonly struct ExcelCell
         ReadCellAttributes(Reader.Attributes, out _Index, out _Style, out _Type);
 
         _SharedStrings = SharedStrings;
-        _Formula = null;
-        _Value = null;
+        _Formula = string.Empty;
+        _Value = string.Empty;
 
         if (!Reader.Read())
             throw new FormatException();
@@ -114,12 +118,12 @@ public readonly struct ExcelCell
         {
             if (Reader.ElementType == typeof(CellValue))
             {
-                _Value = Reader.GetText();
+                _Value = Reader.GetText() ?? string.Empty;
                 Reader.Skip();
             }
             else if (Reader.ElementType == typeof(CellFormula))
             {
-                _Formula = Reader.GetText();
+                _Formula = Reader.GetText() ?? string.Empty;
                 Reader.Skip();
             }
         }

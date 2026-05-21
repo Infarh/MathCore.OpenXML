@@ -18,24 +18,26 @@ public class ExcelSheet : IEnumerable<ExcelRow>
     public ExcelSheet(Excel File, Sheet Sheet)
     {
         _File = File;
-        _SheetName = Sheet.Name.Value;
+        _SheetName = Sheet.Name?.Value ?? throw new InvalidOperationException("Не задано имя листа");
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     public IEnumerator<ExcelRow> GetEnumerator()
     {
         using var document = SpreadsheetDocument.Open(_File.FileName, false);
-        var workbook = document.WorkbookPart;
+          var workbook = document.WorkbookPart ?? throw new InvalidOperationException("В документе отсутствует главная часть");
 
-        var shared_strings = workbook.SharedStringTablePart.SharedStringTable.Elements()
-           .Select(s => s.InnerText)
-           .ToArray();
+          var shared_strings = workbook.SharedStringTablePart?.SharedStringTable?.Elements()
+              .Select(s => s.InnerText)
+              .ToArray() ?? [];
 
-        var sheet_info = workbook.Workbook.Sheets
+          var sheets = workbook.Workbook.Sheets ?? throw new InvalidOperationException("В главной части отсутствует часть с листами");
+          var sheet_info = sheets
            .Cast<Sheet>()
            .First(s => s.Name?.Value == _SheetName);
 
-        var sheet = workbook.GetPartById(sheet_info.Id);
+          var sheet_id = sheet_info.Id?.Value ?? throw new InvalidOperationException("У листа отсутствует идентификатор части");
+          var sheet = workbook.GetPartById(sheet_id);
         var reader = new OpenXmlPartReader(sheet);
 
         if (!FindSheetData(reader)) throw new FormatException("Структура данных листа не включает в себя область данных");
