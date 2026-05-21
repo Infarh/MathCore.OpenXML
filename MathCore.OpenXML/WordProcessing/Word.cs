@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Packaging;
 using System.Runtime.InteropServices.ComTypes;
 
 using MathCore.OpenXML.WordProcessing.Templates;
+using MathCore.OpenXML.WordProcessing.Extensions.Word;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 
@@ -14,10 +15,16 @@ public class Word(FileInfo file) : IEnumerable<string>
 
     public static Word File(string file) => new(new(file));
 
+    public static WordDocument Open(FileInfo file) => new(file);
+    public static WordDocument Open(string file) => new(new FileInfo(file));
+
+    public static WordBuilder Create() => new();
+
     public static WordTemplate Template(FileInfo TemplateFile) => new(TemplateFile);
     public static WordTemplate Template(string TemplateFilePath) => new(TemplateFilePath);
 
     public IEnumerable<string> Paragraphs => EnumParagraphs();
+    public IEnumerable<WordFieldInfo> Fields => EnumFields();
 
     public IEnumerable<string> EnumParagraphs()
     {
@@ -33,6 +40,15 @@ public class Word(FileInfo file) : IEnumerable<string>
             var text = element.InnerText;
             yield return text;
         }
+    }
+
+    public IEnumerable<WordFieldInfo> EnumFields()
+    {
+        using var file_stream = file.OpenRead();
+        using var document = WordprocessingDocument.Open(file_stream, false);
+
+        foreach (var (tag, alias, text) in document.EnumerateFields())
+            yield return new(tag, alias, text);
     }
 
     #region IEnumerable<string>

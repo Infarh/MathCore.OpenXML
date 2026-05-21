@@ -3,7 +3,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace MathCore.OpenXML.WordProcessing.Extensions.Word;
 
-public static class ExetnsionsOpenXmlPackage
+public static class ExtensionsOpenXmlPackage
 {
     public static IEnumerable<(string? tag, string? alias, string text)> EnumerateFields(this OpenXmlPackage package)
     {
