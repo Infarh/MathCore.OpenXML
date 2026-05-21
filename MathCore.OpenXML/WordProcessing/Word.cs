@@ -9,23 +9,81 @@ using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace MathCore.OpenXML.WordProcessing;
 
+/// <summary>
+/// Фасад для компактной работы с Word-документами в формате OpenXML.
+/// </summary>
+/// <example>
+/// <code>
+/// var title = Word.File("report.docx").Read("Title");
+/// 
+/// Word.Open("template.docx")
+///    .Field("Customer", "ООО Ромашка")
+///    .ReplaceFieldsWithValues()
+///    .SaveTo("result.docx");
+/// 
+/// Word.Create()
+///    .Paragraph("Отчет")
+///    .SaveTo("new.docx");
+/// </code>
+/// </example>
 public class Word(FileInfo file) : IEnumerable<string>
 {
+    /// <summary>Создать фасад для чтения существующего документа.</summary>
+    /// <param name="file">Файл документа.</param>
     public static Word File(FileInfo file) => new(file);
 
+    /// <summary>Создать фасад для чтения существующего документа.</summary>
+    /// <param name="file">Путь к файлу документа.</param>
     public static Word File(string file) => new(new(file));
 
+    /// <summary>Открыть существующий документ для fluent-чтения и записи полей.</summary>
+    /// <param name="file">Файл документа.</param>
     public static WordDocument Open(FileInfo file) => new(file);
+
+    /// <summary>Открыть существующий документ для fluent-чтения и записи полей.</summary>
+    /// <param name="file">Путь к файлу документа.</param>
+    /// <example>
+    /// <code>
+    /// Word.Open("input.docx")
+    ///    .Field("Number", 15)
+    ///    .SaveTo("output.docx");
+    /// </code>
+    /// </example>
     public static WordDocument Open(string file) => new(new FileInfo(file));
 
+    /// <summary>Создать новый документ с fluent-интерфейсом построения содержимого.</summary>
+    /// <example>
+    /// <code>
+    /// Word.Create()
+    ///    .Paragraph("Заголовок")
+    ///    .Paragraph("Текст")
+    ///    .SaveTo("result.docx");
+    /// </code>
+    /// </example>
     public static WordBuilder Create() => new();
 
+    /// <summary>Открыть Word-шаблон для заполнения полей содержимым.</summary>
+    /// <param name="TemplateFile">Файл шаблона.</param>
     public static WordTemplate Template(FileInfo TemplateFile) => new(TemplateFile);
+
+    /// <summary>Открыть Word-шаблон для заполнения полей содержимым.</summary>
+    /// <param name="TemplateFilePath">Путь к файлу шаблона.</param>
+    /// <example>
+    /// <code>
+    /// Word.Template("template.docx")
+    ///    .Field("Title", "Отчет")
+    ///    .SaveTo("report.docx");
+    /// </code>
+    /// </example>
     public static WordTemplate Template(string TemplateFilePath) => new(TemplateFilePath);
 
+    /// <summary>Перечисление текстов абзацев документа.</summary>
     public IEnumerable<string> Paragraphs => EnumParagraphs();
+
+    /// <summary>Перечисление всех найденных полей документа.</summary>
     public IEnumerable<WordFieldInfo> Fields => EnumFields();
 
+    /// <summary>Перечислить тексты абзацев документа.</summary>
     public IEnumerable<string> EnumParagraphs()
     {
         using var file_stream = file.OpenRead();
@@ -42,6 +100,7 @@ public class Word(FileInfo file) : IEnumerable<string>
         }
     }
 
+    /// <summary>Перечислить найденные поля документа вместе с их тегами, алиасами и текстом.</summary>
     public IEnumerable<WordFieldInfo> EnumFields()
     {
         using var file_stream = file.OpenRead();
@@ -50,6 +109,23 @@ public class Word(FileInfo file) : IEnumerable<string>
         foreach (var (tag, alias, text) in document.EnumerateFields())
             yield return new(tag, alias, text);
     }
+
+    /// <summary>Прочитать первое значение поля по тегу.</summary>
+    /// <param name="FieldName">Тег поля.</param>
+    /// <returns>Текст первого найденного поля или <see langword="null" />, если поле не найдено.</returns>
+    /// <example>
+    /// <code>
+    /// var customer = Word.File("report.docx").Read("Customer");
+    /// </code>
+    /// </example>
+    public string? Read(string FieldName) => Open(file).Read(FieldName);
+
+    /// <summary>Прочитать все значения полей с указанным тегом.</summary>
+    /// <param name="FieldName">Тег поля.</param>
+    public IReadOnlyList<string> ReadAll(string FieldName) => Open(file).ReadAll(FieldName);
+
+    /// <summary>Прочитать все поля документа, сгруппированные по тегу.</summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> ReadAll() => Open(file).ReadAll();
 
     #region IEnumerable<string>
 

@@ -5,6 +5,18 @@ using MathCore.OpenXML.WordProcessing.Extensions.Word;
 
 namespace MathCore.OpenXML.WordProcessing.Templates;
 
+/// <summary>
+/// Fluent-обертка над Word-шаблоном для заполнения полей и блоков содержимого.
+/// </summary>
+/// <example>
+/// <code>
+/// Word.Template("template.docx")
+///    .Field("Title", "Отчет")
+///    .Field("Total", 1500)
+///    .ReplaceFieldsWithValues()
+///    .SaveTo("report.docx");
+/// </code>
+/// </example>
 public class WordTemplate
 {
     private readonly FileInfo _TemplateFile;
@@ -14,8 +26,10 @@ public class WordTemplate
     private bool _RemoveUnprocessedFields;
     private bool _ReplaceFieldsWithValues;
 
+    /// <summary>Открыть шаблон по пути к файлу.</summary>
     public WordTemplate(string TemplateFilePath) : this(new FileInfo(TemplateFilePath)) { }
 
+    /// <summary>Открыть шаблон из файла.</summary>
     public WordTemplate(FileInfo TemplateFile)
     {
         TemplateFile.Refresh();
@@ -25,18 +39,21 @@ public class WordTemplate
         _TemplateFile = TemplateFile;
     }
 
+    /// <summary>Удалять все необработанные поля при сохранении результата.</summary>
     public WordTemplate RemoveUnprocessedFields(bool Value = true)
     {
         _RemoveUnprocessedFields = Value;
         return this;
     }
 
+    /// <summary>Заменять контейнеры полей их текстовым содержимым.</summary>
     public WordTemplate ReplaceFieldsWithValues(bool Value = true)
     {
         _ReplaceFieldsWithValues = Value;
         return this;
     }
 
+    /// <summary>Перечислить все поля шаблона.</summary>
     public IEnumerable<WordTemplateFieldInfo> EnumerateFields()
     {
         using var document = WordprocessingDocument.Open(_TemplateFile.FullName, true);
@@ -64,12 +81,17 @@ public class WordTemplate
         }
     }
 
+    /// <summary>Перечислить поля, для которых не было задано значение.</summary>
     public IEnumerable<WordTemplateFieldInfo> EnumerateFieldsUnprocessed() => EnumerateFields().Where(f => !_Fields.ContainsKey(f.Tag));
+
+    /// <summary>Перечислить поля, для которых задано значение.</summary>
     public IEnumerable<WordTemplateFieldInfo> EnumerateFieldsProcessed() => EnumerateFields().Where(f => _Fields.ContainsKey(f.Tag));
 
 
+    /// <summary>Сохранить заполненный шаблон в файл по указанному пути.</summary>
     public FileInfo SaveTo(string FilePath) => SaveTo(new FileInfo(FilePath));
 
+    /// <summary>Сохранить заполненный шаблон в указанный файл.</summary>
     public FileInfo SaveTo(FileInfo File)
     {
         try
@@ -123,6 +145,7 @@ public class WordTemplate
         }
     }
 
+    /// <summary>Назначить строковое значение полю шаблона.</summary>
     public WordTemplate Field(string FieldName, string? FieldValue)
     {
         if (FieldValue is null)
@@ -132,6 +155,7 @@ public class WordTemplate
         return this;
     }
 
+    /// <summary>Назначить вычисляемое строковое значение полю шаблона.</summary>
     public WordTemplate Field(string FieldName, Func<string>? FieldValue)
     {
         if (FieldValue is null)
@@ -141,6 +165,7 @@ public class WordTemplate
         return this;
     }
 
+    /// <summary>Назначить объектное значение полю шаблона через преобразование в строку.</summary>
     public WordTemplate Field(string FieldName, object? FieldValue)
     {
         if (FieldValue is null)
@@ -150,6 +175,7 @@ public class WordTemplate
         return this;
     }
 
+    /// <summary>Назначить типизированное значение полю шаблона через преобразование в строку.</summary>
     public WordTemplate Field<T>(string FieldName, T? FieldValue)
     {
         if (FieldValue is null)
@@ -159,6 +185,16 @@ public class WordTemplate
         return this;
     }
 
+    /// <summary>
+    /// Назначить набор значений блочному полю шаблона.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// template.Field("Rows", items, (row, item) => row
+    ///    .Field("Name", item.Name)
+    ///    .Field("Price", item.Price));
+    /// </code>
+    /// </example>
     public WordTemplate Field<T>(string FieldName, IEnumerable<T>? Values, Action<IFieldValueSetter, T>? Setter)
     {
         if (Values is null || Setter is null)
@@ -168,6 +204,7 @@ public class WordTemplate
         return this;
     }
 
+    /// <summary>Назначить набор значений блочному полю шаблона из коллекции с известным размером.</summary>
     public WordTemplate Field<T>(string FieldName, IReadOnlyCollection<T>? Values, Action<IFieldValueSetter, T>? Setter)
     {
         if (Values is not { Count: > 0 } || Setter is null)
