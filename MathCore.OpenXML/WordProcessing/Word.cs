@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Text;
 using DocumentFormat.OpenXml.Packaging;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -148,6 +149,30 @@ public class Word(FileInfo file) : IEnumerable<string>
 
     /// <summary>Прочитать все поля документа, сгруппированные по тегу.</summary>
     public IReadOnlyDictionary<string, IReadOnlyList<string>> ReadAll() => Open(file).ReadAll();
+
+    /// <summary>Прочитать весь текст основного тела документа в одну строку без учета форматирования</summary>
+    /// <param name="ParagraphSeparator">Разделитель между абзацами</param>
+    /// <param name="IncludeEmptyParagraphs">Включать пустые абзацы</param>
+    /// <returns>Объединенный текст основного тела документа</returns>
+    public string ReadText(string ParagraphSeparator = "\n", bool IncludeEmptyParagraphs = false)
+    {
+        ArgumentNullException.ThrowIfNull(ParagraphSeparator);
+
+        var text_builder = new StringBuilder();
+
+        foreach (var paragraph_text in EnumParagraphs())
+        {
+            if (!IncludeEmptyParagraphs && string.IsNullOrEmpty(paragraph_text))
+                continue;
+
+            if (text_builder.Length > 0)
+                text_builder.Append(ParagraphSeparator);
+
+            text_builder.Append(paragraph_text);
+        }
+
+        return text_builder.ToString();
+    }
 
     #region IEnumerable<string>
 
