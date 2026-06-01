@@ -90,6 +90,9 @@ public class Word(FileInfo file) : IEnumerable<string>
     /// <summary>Перечисление всех стилей документа</summary>
     public IEnumerable<Style> Styles => EnumStyles();
 
+    /// <summary>Перечисление краткой информации о всех стилях документа</summary>
+    public IEnumerable<WordStyleInfo> StyleInfos => EnumStyleInfos();
+
     /// <summary>Перечислить тексты абзацев документа.</summary>
     public IEnumerable<string> EnumParagraphs()
     {
@@ -149,6 +152,27 @@ public class Word(FileInfo file) : IEnumerable<string>
 
         foreach (var style in styles.Elements<Style>())
             yield return (Style)style.CloneNode(true);
+    }
+
+    /// <summary>Перечислить краткую информацию о всех стилях документа</summary>
+    public IEnumerable<WordStyleInfo> EnumStyleInfos()
+    {
+        using var file_stream = file.OpenRead();
+        using var document = WordprocessingDocument.Open(file_stream, false);
+
+        var styles_part = document.MainDocumentPart?.StyleDefinitionsPart;
+        var styles = styles_part?.Styles;
+        if (styles is null)
+            yield break;
+
+        foreach (var style in styles.Elements<Style>())
+        {
+            var id = style.StyleId?.Value;
+            var name = style.StyleName?.Val?.Value;
+            var type = style.Type?.Value.ToString();
+            var is_default = style.Default?.Value ?? false;
+            yield return new(id, name, type, is_default);
+        }
     }
 
     /// <summary>Прочитать первое значение поля по тегу.</summary>
