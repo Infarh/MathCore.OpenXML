@@ -87,6 +87,9 @@ public class Word(FileInfo file) : IEnumerable<string>
     /// <summary>Перечисление всех найденных полей документа.</summary>
     public IEnumerable<WordFieldInfo> Fields => EnumFields();
 
+    /// <summary>Перечисление всех стилей документа</summary>
+    public IEnumerable<Style> Styles => EnumStyles();
+
     /// <summary>Перечислить тексты абзацев документа.</summary>
     public IEnumerable<string> EnumParagraphs()
     {
@@ -131,6 +134,21 @@ public class Word(FileInfo file) : IEnumerable<string>
 
         foreach (var (tag, alias, text) in document.EnumerateFields())
             yield return new(tag, alias, text);
+    }
+
+    /// <summary>Перечислить все стили документа</summary>
+    public IEnumerable<Style> EnumStyles()
+    {
+        using var file_stream = file.OpenRead();
+        using var document = WordprocessingDocument.Open(file_stream, false);
+
+        var styles_part = document.MainDocumentPart?.StyleDefinitionsPart;
+        var styles = styles_part?.Styles;
+        if (styles is null)
+            yield break;
+
+        foreach (var style in styles.Elements<Style>())
+            yield return (Style)style.CloneNode(true);
     }
 
     /// <summary>Прочитать первое значение поля по тегу.</summary>
