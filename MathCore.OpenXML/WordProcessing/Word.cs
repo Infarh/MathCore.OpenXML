@@ -80,6 +80,9 @@ public class Word(FileInfo file) : IEnumerable<string>
     /// <summary>Перечисление текстов абзацев документа.</summary>
     public IEnumerable<string> Paragraphs => EnumParagraphs();
 
+    /// <summary>Перечисление текстовых сегментов основного тела документа.</summary>
+    public IEnumerable<string> TextSegments => EnumTextSegments();
+
     /// <summary>Перечисление всех найденных полей документа.</summary>
     public IEnumerable<WordFieldInfo> Fields => EnumFields();
 
@@ -93,10 +96,29 @@ public class Word(FileInfo file) : IEnumerable<string>
         var doc = main.Document;
         var body = doc.Body ?? throw new InvalidOperationException("document.MainDocumentPart.Document.Body is null");
 
-        foreach (var element in body.EnumChild<Paragraph>())
+        foreach (var element in body.Descendants<Paragraph>())
         {
             var text = element.InnerText;
             yield return text;
+        }
+    }
+
+    /// <summary>Перечислить текстовые сегменты основного тела документа без учета форматирования.</summary>
+    /// <param name="IncludeEmpty">Включать пустые сегменты текста.</param>
+    public IEnumerable<string> EnumTextSegments(bool IncludeEmpty = false)
+    {
+        using var file_stream = file.OpenRead();
+        using var document = WordprocessingDocument.Open(file_stream, false);
+
+        var main = document.MainDocumentPart ?? throw new InvalidOperationException("document.MainDocumentPart is null");
+        var doc = main.Document;
+        var body = doc.Body ?? throw new InvalidOperationException("document.MainDocumentPart.Document.Body is null");
+
+        foreach (var element in body.Descendants<Text>())
+        {
+            var text = element.Text;
+            if (IncludeEmpty || !string.IsNullOrEmpty(text))
+                yield return text;
         }
     }
 
@@ -131,7 +153,7 @@ public class Word(FileInfo file) : IEnumerable<string>
 
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<string>)this).GetEnumerator();
 
-    public IEnumerator<string> GetEnumerator() => Paragraphs.GetEnumerator();
+    public IEnumerator<string> GetEnumerator() => TextSegments.GetEnumerator();
 
     #endregion
 
