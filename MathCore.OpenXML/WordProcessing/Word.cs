@@ -175,6 +175,117 @@ public class Word(FileInfo file) : IEnumerable<string>
         }
     }
 
+    /// <summary>Перечислить текстовые фрагменты основного тела документа для стиля с указанным идентификатором</summary>
+    /// <param name="StyleId">Идентификатор стиля</param>
+    /// <param name="IncludeEmpty">Включать пустые сегменты текста</param>
+    public IEnumerable<string> EnumTextSegmentsByStyleId(string StyleId, bool IncludeEmpty = false)
+    {
+        ArgumentNullException.ThrowIfNull(StyleId);
+
+        using var file_stream = file.OpenRead();
+        using var document = WordprocessingDocument.Open(file_stream, false);
+
+        var main = document.MainDocumentPart ?? throw new InvalidOperationException("document.MainDocumentPart is null");
+        var doc = main.Document;
+        var body = doc.Body ?? throw new InvalidOperationException("document.MainDocumentPart.Document.Body is null");
+
+        foreach (var paragraph in body.Descendants<Paragraph>())
+        {
+            var paragraph_style_id = paragraph.ParagraphProperties?.ParagraphStyleId?.Val?.Value;
+            if (string.Equals(paragraph_style_id, StyleId, StringComparison.Ordinal))
+            {
+                foreach (var text_element in paragraph.Descendants<Text>())
+                {
+                    var text = text_element.Text;
+                    if (IncludeEmpty || !string.IsNullOrEmpty(text))
+                        yield return text;
+                }
+
+                continue;
+            }
+
+            foreach (var run in paragraph.Descendants<Run>())
+            {
+                var run_style_id = run.RunProperties?.RunStyle?.Val?.Value;
+                if (!string.Equals(run_style_id, StyleId, StringComparison.Ordinal))
+                    continue;
+
+                foreach (var text_element in run.Descendants<Text>())
+                {
+                    var text = text_element.Text;
+                    if (IncludeEmpty || !string.IsNullOrEmpty(text))
+                        yield return text;
+                }
+            }
+        }
+    }
+
+    /// <summary>Перечислить текстовые фрагменты основного тела документа для стиля с указанным именем</summary>
+    /// <param name="StyleName">Имя стиля</param>
+    /// <param name="IgnoreCase">Игнорировать регистр при сравнении имени</param>
+    /// <param name="IncludeEmpty">Включать пустые сегменты текста</param>
+    public IEnumerable<string> EnumTextSegmentsByStyleName(string StyleName, bool IgnoreCase = true, bool IncludeEmpty = false)
+    {
+        ArgumentNullException.ThrowIfNull(StyleName);
+
+        using var file_stream = file.OpenRead();
+        using var document = WordprocessingDocument.Open(file_stream, false);
+
+        var comparison = IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        var styles = document.MainDocumentPart?.StyleDefinitionsPart?.Styles;
+        if (styles is null)
+            yield break;
+
+        var style_ids = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var style in styles.Elements<Style>())
+        {
+            var style_name = style.StyleName?.Val?.Value;
+            if (!string.Equals(style_name, StyleName, comparison))
+                continue;
+
+            var style_id = style.StyleId?.Value;
+            if (style_id is { Length: > 0 })
+                style_ids.Add(style_id);
+        }
+
+        if (style_ids.Count == 0)
+            yield break;
+
+        var main = document.MainDocumentPart ?? throw new InvalidOperationException("document.MainDocumentPart is null");
+        var doc = main.Document;
+        var body = doc.Body ?? throw new InvalidOperationException("document.MainDocumentPart.Document.Body is null");
+
+        foreach (var paragraph in body.Descendants<Paragraph>())
+        {
+            var paragraph_style_id = paragraph.ParagraphProperties?.ParagraphStyleId?.Val?.Value;
+            if (paragraph_style_id is { Length: > 0 } && style_ids.Contains(paragraph_style_id))
+            {
+                foreach (var text_element in paragraph.Descendants<Text>())
+                {
+                    var text = text_element.Text;
+                    if (IncludeEmpty || !string.IsNullOrEmpty(text))
+                        yield return text;
+                }
+
+                continue;
+            }
+
+            foreach (var run in paragraph.Descendants<Run>())
+            {
+                var run_style_id = run.RunProperties?.RunStyle?.Val?.Value;
+                if (run_style_id is not { Length: > 0 } || !style_ids.Contains(run_style_id))
+                    continue;
+
+                foreach (var text_element in run.Descendants<Text>())
+                {
+                    var text = text_element.Text;
+                    if (IncludeEmpty || !string.IsNullOrEmpty(text))
+                        yield return text;
+                }
+            }
+        }
+    }
+
     /// <summary>Прочитать первое значение поля по тегу.</summary>
     /// <param name="FieldName">Тег поля.</param>
     /// <returns>Текст первого найденного поля или <see langword="null" />, если поле не найдено.</returns>
